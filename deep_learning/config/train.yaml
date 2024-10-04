@@ -1,0 +1,47 @@
+# DATASET CONFIGURATION PARAMETERS
+dataset:
+  mode: 'train'
+  train_dir: '/home/arvc/Fran/datasets/retTruss/'
+  test_dir: '/home/arvc/Fran/datasets/complex_structure/'
+  fixed_size: False
+  sorted: False
+  feat_idx: [7]
+  sequences: [0,1,2,3,4,5,6,7,8,9]
+  # sequences: [0]
+  coord_idx: [0,1,2]
+  label_idx: 3
+  normalize: False
+  force_binary_labels: True
+  add_range_feature: False
+  compute_weights: False
+
+# TRAIN CONFIGURATION PARAMETERS
+train:
+  model: 'pointnet' # 'pointnet', 'pointnet2', 'minkunet34c'
+  device: 'cuda:1' # 'cuda:X' or 'cpu'
+  train_valid_split: 0.8 # 0.8
+  epochs: 1000
+  loss_fn: 'lovasz' # 'bce', 'bcew', 'ce', 'bce_lovasz', 'lovasz'
+  init_lr: 0.01
+  optimizer: 'adamw' # 'adam', 'adamw', 'sgd'
+  scheduler: 'plateau' # 'plateau', 'step', 'onecycle'
+  threshold_method: 'pr' # 'roc', 'pr', 'tunning'
+  termination_criterion: 'miou' # 'loss', 'accuracy', 'f1', 'precision', 'recall', 'miou'
+  improve_patience: 10
+  output_dir: '/home/arvc/Fran/workSpaces/nn_ws/binary_segmentation/tests'
+  voxel_size: 0.1
+  grid_size: 0.05
+  debug: True
+
+  loader:
+    batch_size: 16
+    num_workers: 10
+    shuffle: True
+    pin_memory: True
+    drop_last: False
+    sampler: None # TODO
+    collate_fn: 'default' # TODO
+    worker_init_fn: None # TODO
+    persistent_workers: False # TODO
+
+  

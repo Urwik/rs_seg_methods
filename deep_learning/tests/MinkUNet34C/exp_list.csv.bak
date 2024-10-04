@@ -1,0 +1,70 @@
+0.15,"[4, 5, 6]",roc,loss
+0.05,"[0, 1, 2, 4, 5, 6]",roc,loss
+0.1,"[0, 1, 2, 4, 5, 6]",roc,loss
+0.15,"[0, 1, 2, 4, 5, 6]",roc,loss
+0.05,"[0, 1, 2, 7]",roc,loss
+0.1,"[0, 1, 2, 7]",roc,loss
+0.15,"[0, 1, 2, 7]",roc,loss
+0.05,[7],roc,loss
+0.1,[7],roc,loss
+0.15,[7],roc,loss
+0.05,"[0, 1, 2]",pr,precision
+0.1,"[0, 1, 2]",pr,precision
+0.15,"[0, 1, 2]",pr,precision
+0.05,"[4, 5, 6]",pr,precision
+0.1,"[4, 5, 6]",pr,precision
+0.15,"[4, 5, 6]",pr,precision
+0.05,"[0, 1, 2, 4, 5, 6]",pr,precision
+0.1,"[0, 1, 2, 4, 5, 6]",pr,precision
+0.15,"[0, 1, 2, 4, 5, 6]",pr,precision
+0.05,"[0, 1, 2, 7]",pr,precision
+0.1,"[0, 1, 2, 7]",pr,precision
+0.15,"[0, 1, 2, 7]",pr,precision
+0.05,[7],pr,precision
+0.1,[7],pr,precision
+0.15,[7],pr,precision
+0.05,"[0, 1, 2]",roc,precision
+0.1,"[0, 1, 2]",roc,precision
+0.15,"[0, 1, 2]",roc,precision
+0.05,"[4, 5, 6]",roc,precision
+0.1,"[4, 5, 6]",roc,precision
+0.15,"[4, 5, 6]",roc,precision
+0.05,"[0, 1, 2, 4, 5, 6]",roc,precision
+0.1,"[0, 1, 2, 4, 5, 6]",roc,precision
+0.15,"[0, 1, 2, 4, 5, 6]",roc,precision
+0.05,"[0, 1, 2, 7]",roc,precision
+0.1,"[0, 1, 2, 7]",roc,precision
+0.15,"[0, 1, 2, 7]",roc,precision
+0.05,[7],roc,precision
+0.1,[7],roc,precision
+0.15,[7],roc,precision
+0.05,"[0, 1, 2]",pr,miou
+0.1,"[0, 1, 2]",pr,miou
+0.15,"[0, 1, 2]",pr,miou
+0.05,"[4, 5, 6]",pr,miou
+0.1,"[4, 5, 6]",pr,miou
+0.15,"[4, 5, 6]",pr,miou
+0.05,"[0, 1, 2, 4, 5, 6]",pr,miou
+0.1,"[0, 1, 2, 4, 5, 6]",pr,miou
+0.15,"[0, 1, 2, 4, 5, 6]",pr,miou
+0.05,"[0, 1, 2, 7]",pr,miou
+0.1,"[0, 1, 2, 7]",pr,miou
+0.15,"[0, 1, 2, 7]",pr,miou
+0.05,[7],pr,miou
+0.1,[7],pr,miou
+0.15,[7],pr,miou
+0.05,"[0, 1, 2]",roc,miou
+0.1,"[0, 1, 2]",roc,miou
+0.15,"[0, 1, 2]",roc,miou
+0.05,"[4, 5, 6]",roc,miou
+0.1,"[4, 5, 6]",roc,miou
+0.15,"[4, 5, 6]",roc,miou
+0.05,"[0, 1, 2, 4, 5, 6]",roc,miou
+0.1,"[0, 1, 2, 4, 5, 6]",roc,miou
+0.15,"[0, 1, 2, 4, 5, 6]",roc,miou
+0.05,"[0, 1, 2, 7]",roc,miou
+0.1,"[0, 1, 2, 7]",roc,miou
+0.15,"[0, 1, 2, 7]",roc,miou
+0.05,[7],roc,miou
+0.1,[7],roc,miou
+0.15,[7],roc,miou

@@ -1,0 +1,8 @@
+model_dir: '/home/arvc/Fran/workSpaces/nn_ws/binary_segmentation/tests/PointNetBinSeg/240619140238'
+dataset_dir: '/home/arvc/Fran/datasets/complex_structure/03/ply_xyzln_fixedSize'
+sequences: [0,1,2,3,4,5]
+device: 'cuda:1'
+save_infered_clouds: False
+debug: False
+visualize: False
+  
