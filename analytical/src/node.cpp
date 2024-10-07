@@ -3,7 +3,7 @@
     * 1. Set config.yaml to desired parameters: Mode, Node Length, Node Width, Sac Threshold, Voxel Size
     * 2. Go to the root dir where the clouds are located
     * 3. Run the following command:  
-    * rosrun arvc_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, module, hybrid, wofine, wocoarse_ratio, wocoarse_module, wocoarse_hybrid}
+    * rosrun rs_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, module, hybrid, wofine, wocoarse_ratio, wocoarse_module, wocoarse_hybrid}
     *   !! If <path_to_cloud> is not set, will apply the algorithm to every cloud found in the current directory !!
     * 
     * Name: Fran Soler Mora
@@ -14,7 +14,7 @@
 #include <pcl/common/common.h>
 #include <yaml-cpp/yaml.h>
 #include <cstdlib> // For std::getenv
-#include "arvc_ground_filter/ground_filter.hpp"
+#include "rs_ground_filter/ground_filter.hpp"
 // #include "arvc_utils/arvc_utils.hpp"
 #include "utils.hpp"
 
@@ -224,10 +224,10 @@ int main(int argc, char **argv)
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     std::cout << YELLOW << "Running Ground Filter Node:" << RESET << std::endl;
 
-    // const std::string package_path = ros::package::getPath("arvc_ground_filter");
+    // const std::string package_path = ros::package::getPath("rs_ground_filter");
     // const fs::path CONFIG = fs::path(package_path) / "config/config.yaml";
 
-    const fs::path CONFIG = "/home/fran/workspaces/arvc_ws/src/arvc_ground_filter/config/config.yaml";
+    const fs::path CONFIG = "/home/fran/workspaces/arvc_ws/src/rs_ground_filter/config/config.yaml";
 
     YAML::Node config = YAML::LoadFile(CONFIG.string());
     

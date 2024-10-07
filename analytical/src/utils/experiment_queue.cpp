@@ -1,4 +1,4 @@
-#include "arvc_ground_filter/ground_filter.hpp"
+#include "rs_ground_filter/ground_filter.hpp"
 #include "custom_logger.hpp"
 #include "csv_utils.hpp"
 #include "arvc_utils/arvc_metrics.hpp"
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
     const char* homeDir = std::getenv("HOME");
     const string homePath = homeDir;
 
-    YAML::Node config = YAML::LoadFile(homePath + "/workSpaces/arvc_ws/src/arvc_ground_filter/config/config.yaml");
+    YAML::Node config = YAML::LoadFile(homePath + "/workSpaces/arvc_ws/src/rs_ground_filter/config/config.yaml");
     exp_config e_config;
 
     fs::path dataset_dir = homePath + "/datasets/icinco/v1";
