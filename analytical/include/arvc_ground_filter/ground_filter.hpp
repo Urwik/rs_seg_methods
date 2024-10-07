@@ -12,7 +12,6 @@
 #include "arvc_utils/console.hpp"
 #include "arvc_utils/viewer.hpp"
 #include "arvc_utils/color.hpp"
-// #include "arvc_utils/utils.hpp"
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

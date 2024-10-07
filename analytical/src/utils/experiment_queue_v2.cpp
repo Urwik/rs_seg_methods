@@ -2,14 +2,14 @@
     * 1. Set config.yaml to desired parameters: Mode, Node Length, Node Width, Sac Threshold, Voxel Size
     * 2. Go to the root dir where the clouds are located
     * 3. Run the following command:  
-    * rosrun arvc_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, module, hybrid, wofine, wocoarse_ratio, wocoarse_module, wocoarse_hybrid}
+    * rosrun rs_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, module, hybrid, wofine, wocoarse_ratio, wocoarse_module, wocoarse_hybrid}
     *   !! If <path_to_cloud> is not set, will apply the algorithm to every cloud found in the current directory !!
     * 
     * Name: Fran Soler Mora
     * email: f.soler@umh.es
  */
 
-#include "arvc_ground_filter/ground_filter.hpp"
+#include "rs_ground_filter/ground_filter.hpp"
 #include <yaml-cpp/yaml.h>
 #include <cstdlib> // For std::getenv
 #include <pcl/common/common.h>
@@ -127,7 +127,7 @@ void experiment(YAML::Node config, std::vector<fs::path> path_vector){
     std::cout << "Average Computation Time: " << avg_time << " ms" << endl;
 
     data.exec_time = avg_time;
-    writeToCSV(fs::path("/home/arvc/workSpaces/arvc_ws/src/arvc_ground_filter/results"), data);
+    writeToCSV(fs::path("/home/arvc/workSpaces/arvc_ws/src/rs_ground_filter/results"), data);
 }
 
 
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
     const char *homeDir = std::getenv("HOME");
     const string HOME = homeDir;
-    const fs::path CONFIG = HOME + "/workSpaces/arvc_ws/src/arvc_ground_filter/config/config.yaml";
+    const fs::path CONFIG = HOME + "/workSpaces/arvc_ws/src/rs_ground_filter/config/config.yaml";
     const fs::path ROOT_DIR = HOME + "/datasets/complex_structure";
 
     const std::vector<std::string> DATASETS = {"orto", "crossed", "00", "01", "02", "03"};
