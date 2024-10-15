@@ -4,9 +4,10 @@
     * 2. Go to the root dir where the clouds are located
     * 3. Run the following command:
     * if compiled with catkin_make (ROS)  
-    * rosrun analytical_rs_seg ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
+    *   rosrun analytical_rs_seg ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
     * else if compiled with cmake
-    * ./ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
+    *   add build folder to the env variable PATH 
+    *   run: ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
     *   !! If <path_to_cloud> is not set, will apply the algorithm to every cloud found in the current directory !!
     * 
     * Name: Fran Soler Mora
