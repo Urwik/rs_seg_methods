@@ -22,11 +22,11 @@ using namespace std;
 
 enum class MODE{
     RATIO,
-    MODULE,
+    MAGNITUDE,
     HYBRID,
     WOFINE,
     WOCOARSE_RATIO,
-    WOCOARSE_MODULE,
+    WOCOARSE_MAGNITUDE,
     WOCOARSE_HYBRID
 };
 
@@ -70,7 +70,7 @@ public:
     bool enable_euclidean_clustering;
 
     float ratio_threshold;
-    float module_threshold;
+    float magnitude_threshold;
     float ransac_threshold;
     float voxel_size;
     bool density_first;
@@ -130,11 +130,11 @@ private:
 
     bool valid_ratio(pcl::IndicesPtr &_cluster_indices);
 
-    bool valid_module(pcl::IndicesPtr &_cluster_indices);
+    bool valid_magnitude(pcl::IndicesPtr &_cluster_indices);
 
     vector<int> validate_clusters_by_ratio();
 
-    vector<int> validate_clusters_by_module();
+    vector<int> validate_clusters_by_magnitude();
 
     vector<int> validate_clusters_hybrid();
 
@@ -158,14 +158,14 @@ MODE parse_MODE(const std::string& mode) {
         return MODE::WOFINE;
     } else if (mode == "wocoarse_ratio") {
         return MODE::WOCOARSE_RATIO;
-    } else if (mode == "wocoarse_module") {
-        return MODE::WOCOARSE_MODULE;
+    } else if (mode == "wocoarse_magnitude") {
+        return MODE::WOCOARSE_MAGNITUDE;
     } else if (mode == "wocoarse_hybrid") {
         return MODE::WOCOARSE_HYBRID;
     } else if (mode == "ratio") {
         return MODE::RATIO;
-    } else if (mode == "module") {
-        return MODE::MODULE;
+    } else if (mode == "magnitude") {
+        return MODE::MAGNITUDE;
     } else if (mode == "hybrid") {
         return MODE::HYBRID;
     } else {
@@ -179,14 +179,14 @@ string parse_MODE(MODE mode) {
             return "wofine";
         case MODE::WOCOARSE_RATIO:
             return "wocoarse_ratio";
-        case MODE::WOCOARSE_MODULE:
-            return "wocoarse_module";
+        case MODE::WOCOARSE_MAGNITUDE:
+            return "wocoarse_magnitude";
         case MODE::WOCOARSE_HYBRID:
             return "wocoarse_hybrid";
         case MODE::RATIO:
             return "ratio";
-        case MODE::MODULE:
-            return "module";
+        case MODE::MAGNITUDE:
+            return "magnitude";
         case MODE::HYBRID:
             return "hybrid";
         default:

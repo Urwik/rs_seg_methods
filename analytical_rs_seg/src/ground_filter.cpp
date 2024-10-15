@@ -1,6 +1,7 @@
 #include "analytical_rs_seg/ground_filter.hpp"
 
 #include <pcl/common/transforms.h>
+#include <pcl/common/common.h>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ GroundFilter::GroundFilter() {
   this->normals_time = 0;
   this->metrics_time = 0;
   this->ratio_threshold = 0.3f;
-  this->module_threshold = 1000.0f;
+  this->magnitude_threshold = 1000.0f;
   this->sac_threshold = 0.5f;
   this->mode = MODE::HYBRID;
   this->cloud_id = "NO_ID";
@@ -139,8 +140,8 @@ int GroundFilter::compute() {
         this->euclidean_clustering();
     break;
   
-  case MODE::MODULE:
-    this->module_threshold = this->sac_threshold;
+  case MODE::MAGNITUDE:
+    this->magnitude_threshold = this->sac_threshold;
     this->coarse_segmentation();
     this->fine_segmentation();
     this->update_segmentation();
@@ -154,7 +155,7 @@ int GroundFilter::compute() {
 
   case MODE::HYBRID:
     this->ratio_threshold = this->node_width / this->sac_threshold;
-    this->module_threshold = this->sac_threshold;
+    this->magnitude_threshold = this->sac_threshold;
     this->coarse_segmentation();
     this->fine_segmentation();
     this->update_segmentation();
@@ -178,8 +179,8 @@ int GroundFilter::compute() {
         this->euclidean_clustering();
     break;
 
-  case MODE::WOCOARSE_MODULE:
-    this->module_threshold = this->node_length;
+  case MODE::WOCOARSE_MAGNITUDE:
+    this->magnitude_threshold = this->node_length;
     this->fine_segmentation();
     this->update_segmentation();
     if(this->enable_density_filter and this->enable_euclidean_clustering)
@@ -192,7 +193,7 @@ int GroundFilter::compute() {
 
   case MODE::WOCOARSE_HYBRID:
     this->ratio_threshold = this->node_width / this->node_length;
-    this->module_threshold = this->node_length;
+    this->magnitude_threshold = this->node_length;
     this->fine_segmentation();
     this->update_segmentation();
     if(this->enable_density_filter and this->enable_euclidean_clustering)
@@ -215,7 +216,7 @@ int GroundFilter::compute() {
     break;
 
   default:
-    this->cons.debug("ERROR: Invalid mode selected, options are: RATIO, MODULE, HYBRID, WOFINE, WOCOARSE_RATIO, WOCOARSE_MODULE, WOCOARSE_HYBRID", "RED");
+    this->cons.debug("ERROR: Invalid mode selected, options are: RATIO, MAGNITUDE, HYBRID, WOFINE, WOCOARSE_RATIO, WOCOARSE_MAGNITUDE, WOCOARSE_HYBRID", "RED");
     break;
   }
 
@@ -318,7 +319,7 @@ void GroundFilter::validate_clusters(){
 
   map<string, int> mode_dict;
   mode_dict["ratio"] = 0;
-  mode_dict["module"] = 1;
+  mode_dict["magnitude"] = 1;
   mode_dict["hybrid"] = 2;
 
 
@@ -327,8 +328,8 @@ void GroundFilter::validate_clusters(){
   case MODE::RATIO:
     this->valid_clusters = this->validate_clusters_by_ratio();
     break;
-  case MODE::MODULE:
-    this->valid_clusters = this->validate_clusters_by_module();
+  case MODE::MAGNITUDE:
+    this->valid_clusters = this->validate_clusters_by_magnitude();
     break;
   case MODE::HYBRID:
     this->valid_clusters = this->validate_clusters_hybrid();
@@ -336,8 +337,8 @@ void GroundFilter::validate_clusters(){
   case MODE::WOCOARSE_RATIO:
     this->valid_clusters = this->validate_clusters_by_ratio();
     break;
-  case MODE::WOCOARSE_MODULE:
-    this->valid_clusters = this->validate_clusters_by_module();
+  case MODE::WOCOARSE_MAGNITUDE:
+    this->valid_clusters = this->validate_clusters_by_magnitude();
     break;
   case MODE::WOCOARSE_HYBRID:
     this->valid_clusters = this->validate_clusters_hybrid();
@@ -417,7 +418,7 @@ bool GroundFilter::valid_ratio(pcl::IndicesPtr& _cluster_indices)
       return false;
 }
 
-bool GroundFilter::valid_module(pcl::IndicesPtr& _cluster_indices){
+bool GroundFilter::valid_magnitude(pcl::IndicesPtr& _cluster_indices){
 
   // GET THE CLOUD REPRESENTING THE CLUSTER
   PointCloud::Ptr cluster_cloud (new PointCloud);
@@ -448,7 +449,7 @@ bool GroundFilter::valid_module(pcl::IndicesPtr& _cluster_indices){
   max_values.y() = std::abs(maxPoint.y - minPoint.y);
   max_values.z() = std::abs(maxPoint.z - minPoint.z);
 
-  if (max_values.maxCoeff() < this->module_threshold)
+  if (max_values.maxCoeff() < this->magnitude_threshold)
     return true;
   else
     return false;
@@ -475,7 +476,7 @@ vector<int> GroundFilter::validate_clusters_by_ratio()
   return valid_clusters;
 }
 
-vector<int> GroundFilter::validate_clusters_by_module()
+vector<int> GroundFilter::validate_clusters_by_magnitude()
 {
   vector<int> valid_clusters;
   valid_clusters.clear();
@@ -489,7 +490,7 @@ vector<int> GroundFilter::validate_clusters_by_module()
   {
     *current_cluster = cluster.indices;
 
-    if (this->valid_module(current_cluster))
+    if (this->valid_magnitude(current_cluster))
       valid_clusters.push_back(clust_indx);
       
     clust_indx++;
@@ -512,7 +513,7 @@ vector<int> GroundFilter::validate_clusters_hybrid()
   {
     *current_cluster = cluster.indices;
 
-    if (this->valid_module(current_cluster) && this->valid_ratio(current_cluster))
+    if (this->valid_magnitude(current_cluster) && this->valid_ratio(current_cluster))
       valid_clusters.push_back(clust_indx);
     
     clust_indx++;
