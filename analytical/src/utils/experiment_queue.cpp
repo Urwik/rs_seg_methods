@@ -1,7 +1,6 @@
-#include "rs_ground_filter/ground_filter.hpp"
-#include "custom_logger.hpp"
+#include "analytical_rs_seg/ground_filter.hpp"
+// #include "custom_logger.hpp"
 #include "csv_utils.hpp"
-#include "arvc_utils/arvc_metrics.hpp"
 #include <yaml-cpp/yaml.h>
 #include <cstdlib> // For std::getenv
 #include <ctime>
@@ -53,7 +52,7 @@ void experiment(exp_config _config){
     const int CROP_SET          = _config.CROP_SET;
 
     // VARIABLES UTILITIES
-    arvc::Metrics global_metrics;
+    utils::Metrics global_metrics;
     int normals_time = 0, metrics_time = 0, dataset_size = 0;
 
     // Save all the paths of the clouds in the current directory for the tqdm loop
@@ -112,14 +111,10 @@ void experiment(exp_config _config){
         normals_time += gf.normals_time;
         metrics_time += gf.metrics_time;
 
-        global_metrics.accuracy.push_back(gf.metricas.values.accuracy);
-        global_metrics.precision.push_back(gf.metricas.values.precision);
-        global_metrics.recall.push_back(gf.metricas.values.recall);
-        global_metrics.f1_score.push_back(gf.metricas.values.f1_score);
-        global_metrics.tp.push_back(gf.metricas.values.tp);
-        global_metrics.tn.push_back(gf.metricas.values.tn);
-        global_metrics.fp.push_back(gf.metricas.values.fp);
-        global_metrics.fn.push_back(gf.metricas.values.fn);
+        global_metrics.tp += gf.metrics.tp;
+        global_metrics.tn += gf.metrics.tn;
+        global_metrics.fp += gf.metrics.fp;
+        global_metrics.fn += gf.metrics.fn;
     }
 
 
@@ -129,46 +124,23 @@ void experiment(exp_config _config){
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-    mtx.lock();
-    Logger myLog(_config.set_path.string() + "/log.txt");
-    myLog.log("------------------------------------------------------------\n");
-    myLog.log("Date and Time: " + strDateTime);
-    myLog.log("Experiment ID: " + _config.experiment_id);
-    myLog.log("Current directory: " + _config.set_path.string());
-    myLog.log("Crop Set: " + to_string(CROP_SET));
-    myLog.log("Mode: " + parse_MODE(modo));
-    myLog.log("Node Length: " + to_string(_config.NODE_LENGTH));
-    myLog.log("Node Width: " + to_string(_config.NODE_WIDTH));
-    myLog.log("SAC Threshold: " + to_string(_config.SAC_THRESHOLD));
-    myLog.log("Voxel Size: " + to_string(_config.VOXEL_SIZE));
-    myLog.log("Density Filter: " + to_string(_config.EN_DENSITY));
-    myLog.log("Density Threshold: " + to_string(_config.DENSITY_THRESHOLD));
-    myLog.log("Density Radius: " + to_string(_config.DENSITY_RADIUS));
-    myLog.log("Euclidean Clustering: " + to_string(_config.EN_EUCLIDEAN_CLUSTERING));
-    myLog.log("Cluster Radius: " + to_string(_config.CLUSTER_RADIUS));
-    myLog.log("Cluster Min Size: " + to_string(_config.CLUSTER_MIN_SIZE));
-    myLog.log(global_metrics.getString());
-    myLog.log("Average Computation Time: " + to_string(duration.count() / dataset_size) + " ms");
-    mtx.unlock();
-
-
     csv_data data;
     data.experiment_id = _config.experiment_id;
     data.mode = parse_MODE(modo);
-    data.set = stoi(_config.set_path.filename().string());
+    data.set_id = stoi(_config.set_path.filename().string());
     data.set_size = dataset_size;
-    data.precision = arvc::Metrics::getMean<float>(global_metrics.precision);
-    data.recall = arvc::Metrics::getMean<float>(global_metrics.recall);
-    data.f1_score = arvc::Metrics::getMean<float>(global_metrics.f1_score);
-    data.tp = arvc::Metrics::getMean<int>(global_metrics.tp);
-    data.tn = arvc::Metrics::getMean<int>(global_metrics.tn);
-    data.fp = arvc::Metrics::getMean<int>(global_metrics.fp);
-    data.fn = arvc::Metrics::getMean<int>(global_metrics.fn);
+    data.precision = global_metrics.precision();
+    data.recall = global_metrics.recall();
+    data.f1_score = global_metrics.f1_score();
+    data.tp = global_metrics.tp;
+    data.tn = global_metrics.tn;
+    data.fp = global_metrics.fp;
+    data.fn = global_metrics.fn;
     data.exec_time = (int) floor((duration.count() -   metrics_time) / dataset_size);
     data.ground_size = (int)round(num_ground_idx/dataset_size);
     data.truss_size = (int)round(num_truss_idx/dataset_size);
     data.density_threshold = _config.DENSITY_THRESHOLD;
-    data.euclidean_threshold = _config.CLUSTER_MIN_SIZE;
+    data.euclid_min_size = _config.CLUSTER_MIN_SIZE;
     data.voxel_size = _config.VOXEL_SIZE;
     data.sac_threshold = _config.SAC_THRESHOLD;
     data.node_length = _config.NODE_LENGTH;

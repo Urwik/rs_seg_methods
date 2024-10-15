@@ -7,11 +7,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "tqdm.hpp"
+
 #include "utils.hpp"
-#include "arvc_utils/metrics.hpp"
-#include "arvc_utils/console.hpp"
-#include "arvc_utils/viewer.hpp"
-#include "arvc_utils/color.hpp"
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -37,19 +34,31 @@ class GroundFilter
 {
 
 public:
+    MODE mode;
+    
+    pcl::IndicesPtr gt_truss_idx;
+    pcl::IndicesPtr gt_ground_idx;
+
     pcl::IndicesPtr coarse_ground_idx;
     pcl::IndicesPtr coarse_truss_idx;
-
-    vector<pcl::PointIndices> regrow_clusters;
-    vector<pcl::PointIndices> euclid_clusters;
-    vector<int> valid_clusters;
 
     pcl::IndicesPtr truss_idx;
     pcl::IndicesPtr ground_idx;
     pcl::IndicesPtr low_density_idx;
     pcl::IndicesPtr wrong_idx;
 
-    arvc::Metrics metricas;
+    YAML::Node cfg;
+    string cloud_id;
+    fs::path save_cloud_path;
+
+    vector<pcl::PointIndices> regrow_clusters;
+    vector<pcl::PointIndices> euclid_clusters;
+    vector<int> valid_clusters;
+
+
+    // TODO: REMOVE ARVC LIBRARY USAGE
+    utils::Console cons;
+
     utils::Metrics metrics;
     utils::ConfusionMatrix cm;
 
@@ -72,15 +81,6 @@ public:
     int cluster_min_size;
     bool save_cloud;
 
-    MODE mode;
-    arvc::Console cons;
-    
-    pcl::IndicesPtr gt_truss_idx;
-    pcl::IndicesPtr gt_ground_idx;
-    YAML::Node cfg;
-    string cloud_id;
-    fs::path save_cloud_path;
-
 
 private:
     PointCloud::Ptr cloud_in;
@@ -88,9 +88,7 @@ private:
     pcl::PointCloud<pcl::PointXYZL>::Ptr cloud_out;
 
 
-
     pcl::IndicesPtr tp_idx, fp_idx, fn_idx, tn_idx;
-
 
     float node_length, node_width, sac_threshold;
 

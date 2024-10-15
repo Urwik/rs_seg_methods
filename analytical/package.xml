@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rs_ground_filter</name>
+  <name>analytical_rs_seg</name>
   <version>0.0.0</version>
-  <description>The rs_ground_filter package</description>
+  <description>The analytical_rs_seg package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -53,10 +53,14 @@
   <build_depend>rospy</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>arvc_utils</build_depend>
+
+
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>roslib</build_export_depend>
   <build_export_depend>arvc_utils</build_export_depend>
+
+  
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>roslib</exec_depend>

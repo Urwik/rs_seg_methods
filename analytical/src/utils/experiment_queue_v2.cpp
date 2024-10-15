@@ -61,7 +61,7 @@ void experiment(YAML::Node config, std::vector<fs::path> path_vector){
     auto start = std::chrono::high_resolution_clock::now();
     for (const fs::path &entry : tq::tqdm(path_vector))
     {
-        input_cloud_xyzln = arvc::readPointCloud<PointIN>(entry);
+        input_cloud_xyzln = utils::readPointCloud<PointIN>(entry);
         pcl::copyPointCloud(*input_cloud_xyzln, *cloud);
 
         GroundFilter gf(config);

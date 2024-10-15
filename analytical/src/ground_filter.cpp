@@ -1,5 +1,6 @@
-#include "rs_ground_filter/ground_filter.hpp"
+#include "analytical_rs_seg/ground_filter.hpp"
 
+#include <pcl/common/transforms.h>
 
 using namespace std;
 
@@ -525,8 +526,6 @@ void GroundFilter::compute_metrics(){
   auto start = std::chrono::high_resolution_clock::now();
   
   this->cm = utils::compute_conf_matrix(this->gt_truss_idx, this->gt_ground_idx, this->truss_idx, this->ground_idx);
-
-  this->metricas.computeMetricsFromConfusionMatrix(this->cm.tp, this->cm.fp, this->cm.fn, this->cm.tn);
 
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
