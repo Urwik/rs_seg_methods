@@ -10,7 +10,7 @@ sys.path.append('/home/arvc/workSpaces/nn_ws/binary_segmentation')
 
 from engines.trainers.trainer import TrainerBase
 from engines.dataset.pointcept_dataset import PointCeptDataset
-from models.pointTransfomerV3 import PointTransformerV3
+from models._pointTransfomerV3 import PointTransformerV3
 
 from repos.Pointcept.pointcept.datasets.utils import point_collate_fn
 
