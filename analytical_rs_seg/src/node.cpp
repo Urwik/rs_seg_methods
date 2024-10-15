@@ -3,7 +3,7 @@
     * 1. Set config.yaml to desired parameters: Mode, Node Length, Node Width, Sac Threshold, Voxel Size
     * 2. Go to the root dir where the clouds are located
     * 3. Run the following command:  
-    * rosrun rs_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
+    * rosrun analytical_rs_seg ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
     *   !! If <path_to_cloud> is not set, will apply the algorithm to every cloud found in the current directory !!
     * 
     * Name: Fran Soler Mora
@@ -224,10 +224,7 @@ int main(int argc, char **argv)
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     std::cout << YELLOW << "Running Ground Filter Node:" << RESET << std::endl;
 
-    // const std::string package_path = ros::package::getPath("rs_ground_filter");
-    // const fs::path CONFIG = fs::path(package_path) / "config/config.yaml";
-
-    const fs::path CONFIG = "/home/fran/workspaces/arvc_ws/src/rs_ground_filter/config/config.yaml";
+    const fs::path CONFIG = "/home/fran/workspaces/arvc_ws/src/analytical_rs_seg/config/config.yaml";
 
     YAML::Node config = YAML::LoadFile(CONFIG.string());
     
@@ -259,9 +256,6 @@ int main(int argc, char **argv)
     const int dataset_size = path_vector.size();
 
 
-    // std::cout << "Num argc: " << argc << std::endl;
-    // return 0;
-    
     if (argc > 1)
     {
         fs::path entry = argv[1];
@@ -277,10 +271,8 @@ int main(int argc, char **argv)
         return 0;
     }
 
-
     // best_voxel_estimation(path_vector, config);
     // best_density_estimation(path_vector,config);
-    // return 0;
 
     auto start = std::chrono::high_resolution_clock::now();
     for (const fs::path &entry : tq::tqdm(path_vector))
