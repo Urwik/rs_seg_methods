@@ -3,7 +3,7 @@
     * 1. Set config.yaml to desired parameters: Mode, Node Length, Node Width, Sac Threshold, Voxel Size
     * 2. Go to the root dir where the clouds are located
     * 3. Run the following command:  
-    * rosrun rs_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, module, hybrid, wofine, wocoarse_ratio, wocoarse_module, wocoarse_hybrid}
+    * rosrun rs_ground_filter ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
     *   !! If <path_to_cloud> is not set, will apply the algorithm to every cloud found in the current directory !!
     * 
     * Name: Fran Soler Mora
@@ -14,8 +14,8 @@
 #include <pcl/common/common.h>
 #include <yaml-cpp/yaml.h>
 #include <cstdlib> // For std::getenv
-#include "rs_ground_filter/ground_filter.hpp"
-// #include "arvc_utils/arvc_utils.hpp"
+
+#include "analytical_rs_seg/ground_filter.hpp"
 #include "utils.hpp"
 
 
@@ -49,7 +49,7 @@ std::vector<fs::path> get_data_paths(int argc, char **argv)
     else
     {
         std::cout << "\tNo mode selected." << std::endl;
-        std::cout << "\tUsage: ./rrss_grnd_filter <path_to_cloud> <mode>{ratio, module, hybrid, wofine, wocoarse}" << std::endl;
+        std::cout << "\tUsage: ./ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse}" << std::endl;
     }
 
     return path_vector;
