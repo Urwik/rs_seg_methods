@@ -1,3 +1,4 @@
 .vscode/
 analytical_rs_seg/src/utils/
+analytical_rs_seg/build/
 results/

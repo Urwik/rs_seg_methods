@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CSV_UTILS_HPP
+#define CSV_UTILS_HPP
 
 #include <iostream>
 #include <fstream>
@@ -104,3 +105,4 @@ void writeToCSV(const fs::path& dir_path, const csv_data& data) {
 
     csv_file.close();
 }
+#endif // CSV_UTILS_HPP

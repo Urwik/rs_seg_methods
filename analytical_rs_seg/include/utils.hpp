@@ -1,4 +1,6 @@
-#pragma once
+#ifndef UTILS_HPP
+#define UTILS_HPP
+
 
 #include <iostream>
 #include <filesystem>
@@ -31,9 +33,7 @@ namespace fs = std::filesystem;
 namespace utils {
 
     template<typename T>
-    typename pcl::PointCloud<T>::Ptr 
-
-    readPointCloud(const std::string& path)
+    inline typename pcl::PointCloud<T>::Ptr readPointCloud(const std::string& path)
     {
     typename pcl::PointCloud<T>::Ptr cloud(new pcl::PointCloud<T>);
     std::map<std::string, int> ext_map = { {".pcd", 0}, {".ply", 1} };
@@ -63,7 +63,6 @@ namespace utils {
     }
 
 
-
     struct GtIndices
     {
         pcl::IndicesPtr truss;
@@ -84,7 +83,7 @@ namespace utils {
     };
 
 
-    pcl::PointCloud<pcl::PointXYZL>::Ptr read_cloud(fs::path _path)
+    inline pcl::PointCloud<pcl::PointXYZL>::Ptr read_cloud(fs::path _path)
     {
 
         pcl::PCDReader reader;
@@ -94,7 +93,7 @@ namespace utils {
         return cloud;
     }
 
-    GtIndices get_ground_truth_indices(pcl::PointCloud<pcl::PointXYZL>::Ptr &_cloud)
+    inline GtIndices get_ground_truth_indices(pcl::PointCloud<pcl::PointXYZL>::Ptr &_cloud)
     {
 
         GtIndices indices;
@@ -113,8 +112,7 @@ namespace utils {
     }
 
 
-    std::vector<int>
-    vector_difference(std::vector<int> v1, std::vector<int> v2)
+    inline std::vector<int> vector_difference(std::vector<int> v1, std::vector<int> v2)
     {
         std::vector<int> difference;
 
@@ -142,8 +140,7 @@ namespace utils {
         return difference;
     }
 
-    std::vector<int>
-    vector_intersection(std::vector<int> v1, std::vector<int> v2)
+    inline std::vector<int> vector_intersection(std::vector<int> v1, std::vector<int> v2)
     {
         std::vector<int> intersection;
 
@@ -175,8 +172,7 @@ namespace utils {
     }
 
 
-    ConfusionMatrix
-    compute_conf_matrix(pcl::IndicesPtr &gt_truss_idx, pcl::IndicesPtr &gt_ground_idx, pcl::IndicesPtr &truss_idx, pcl::IndicesPtr &ground_idx)
+    inline ConfusionMatrix compute_conf_matrix(pcl::IndicesPtr &gt_truss_idx, pcl::IndicesPtr &gt_ground_idx, pcl::IndicesPtr &truss_idx, pcl::IndicesPtr &ground_idx)
     {
         ConfusionMatrix cm;
 
@@ -196,8 +192,7 @@ namespace utils {
      * @param indices_vec Vector con los índices de los puntos que se quieren extraer
      * @param negative Si es true, se extraen los puntos que no están en indx_vec
      */
-    PointCloud::Ptr
-    extract_indices(PointCloud::Ptr &cloud, std::vector<pcl::PointIndices> indices_vec, bool negative = false)
+    inline PointCloud::Ptr extract_indices(PointCloud::Ptr &cloud, std::vector<pcl::PointIndices> indices_vec, bool negative = false)
     {
     pcl::PointIndices::Ptr indices (new pcl::PointIndices);
     PointCloud::Ptr _cloud_out (new PointCloud);
@@ -224,8 +219,7 @@ namespace utils {
      * @param indices Indices de los puntos que se quieren extraer
      * @param negative Si es true, se extraen los puntos que no están en indx_vec
      */
-    PointCloud::Ptr
-    extract_indices (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool negative = false)
+    inline PointCloud::Ptr extract_indices (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool negative = false)
     {
     PointCloud::Ptr _cloud_out (new PointCloud);
     pcl::ExtractIndices<PointT> extract;
@@ -236,14 +230,17 @@ namespace utils {
 
     return _cloud_out;
     }
+
+
+
+
     /**
      * @brief Returns a Voxelized PointCloud
      * 
      * @param _cloud_in 
      * @return pcl::PointCloud<pcl::PointXYZ>::Ptr
      */
-    PointCloud::Ptr
-    voxel_filter( PointCloud::Ptr &_cloud_in ,float leafSize = 0.1)
+    inline PointCloud::Ptr voxel_filter( PointCloud::Ptr &_cloud_in ,float leafSize = 0.1)
     {
     PointCloud::Ptr _cloud_out (new PointCloud);
     pcl::VoxelGrid<PointT> sor;
@@ -254,6 +251,8 @@ namespace utils {
     return _cloud_out;
     }
 
+
+
     /**
      * @brief Filtra la nube de puntos en función de los índices pasados como parámetro
      * 
@@ -263,8 +262,7 @@ namespace utils {
      * @param maxIterations 
      * @return pcl::ModelCoefficients::Ptr 
      */
-    pcl::ModelCoefficientsPtr 
-    compute_planar_ransac (PointCloud::Ptr &_cloud_in, const bool optimizeCoefs,
+    inline pcl::ModelCoefficientsPtr compute_planar_ransac (PointCloud::Ptr &_cloud_in, const bool optimizeCoefs,
                 float distThreshold = 0.03, int maxIterations = 1000)
     {
     pcl::PointIndices point_indices;
@@ -282,6 +280,8 @@ namespace utils {
     return plane_coeffs;
     }
 
+
+
     /**
      * @brief Filtra la nube de puntos en función de los índices pasados como parámetro
      * 
@@ -290,8 +290,7 @@ namespace utils {
      * @param distThreshold 
      * @return pcl::PointIndices::Ptr 
      */
-    std::pair<pcl::IndicesPtr, pcl::IndicesPtr>
-    get_points_near_plane(PointCloud::Ptr &_cloud_in, pcl::ModelCoefficientsPtr &_plane_coeffs, float distThreshold = 0.5f)
+    inline std::pair<pcl::IndicesPtr, pcl::IndicesPtr> get_points_near_plane(PointCloud::Ptr &_cloud_in, pcl::ModelCoefficientsPtr &_plane_coeffs, float distThreshold = 0.5f)
     {
     Eigen::Vector4f coefficients(_plane_coeffs->values.data());
     pcl::PointXYZ point;
@@ -311,6 +310,8 @@ namespace utils {
     return std::pair<pcl::IndicesPtr, pcl::IndicesPtr> {_plane_inliers, _plane_outliers};
     }
 
+
+
     /**
      * @brief Realiza agrupaciones de puntos en función de sus normales
      * 
@@ -318,8 +319,7 @@ namespace utils {
      * @return std::vector<pcl::PointIndices> Vector con los indices pertenecientes 
      * a cada agrupación 
      */
-    std::pair<std::vector<pcl::PointIndices>, int>
-    regrow_segmentation (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool _visualize=false)
+    inline std::pair<std::vector<pcl::PointIndices>, int> regrow_segmentation (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool _visualize=false)
     {
     // std::cout << "Regrow segmentation a set of indices fomr a cloud" << std::endl;
 
@@ -405,6 +405,8 @@ namespace utils {
     return std::pair<std::vector<pcl::PointIndices>, int> {_regrow_clusters, duration.count()};
     }
 
+
+
     /**
      * @brief Realiza agrupaciones de puntos en función de sus normales
      * 
@@ -412,8 +414,7 @@ namespace utils {
      * @return std::std::vector<pcl::PointIndices> std::vector con los indices pertenecientes 
      * a cada agrupación 
      */
-    std::pair<std::vector<pcl::PointIndices>, int>
-    regrow_segmentation (PointCloud::Ptr &_cloud_in, bool _visualize = false)
+    inline std::pair<std::vector<pcl::PointIndices>, int> regrow_segmentation (PointCloud::Ptr &_cloud_in, bool _visualize = false)
     {
     std::cout << "Regrow segmentation complete cloud" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
@@ -481,6 +482,9 @@ namespace utils {
     return std::pair<std::vector<pcl::PointIndices>, int> {_regrow_clusters, duration.count()};
     }
 
+
+
+
     /**
      * @brief Remove points with less than minNeighbors inside a give radius
      * 
@@ -488,8 +492,7 @@ namespace utils {
      * @param minNeighbors Minimum num of Neighbors to consider a point an inlier
      * @return PointCloud::Ptr Return a PointCloud without low neighbor points
      */
-    pcl::IndicesPtr
-    radius_outlier_removal (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices_in, float radius, int minNeighbors, bool negative = false)
+    inline pcl::IndicesPtr radius_outlier_removal (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices_in, float radius, int minNeighbors, bool negative = false)
     {
     PointCloud::Ptr _cloud_out (new PointCloud);
     pcl::IndicesPtr _indices_out (new pcl::Indices);
@@ -504,8 +507,9 @@ namespace utils {
     return _indices_out;
     }
 
-    pcl::IndicesPtr
-    inverseIndices(PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices_in)
+
+
+    inline pcl::IndicesPtr inverseIndices(PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices_in)
     {
     pcl::IndicesPtr _indices_out (new pcl::Indices);
     pcl::ExtractIndices<PointT> extract;
@@ -524,8 +528,7 @@ namespace utils {
     Eigen::Matrix3f vectors;
     };
 
-    eig_decomp
-    compute_eigen_decomposition(PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool normalize = true)
+    inline eig_decomp compute_eigen_decomposition(PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool normalize = true)
     {
     Eigen::Vector4f xyz_centroid;
     PointCloud::Ptr tmp_cloud (new PointCloud);
@@ -547,124 +550,5 @@ namespace utils {
     return eigen_decomp;
     }
 
-    class Metrics
-    {
-        public:
-        int tp;
-        int tn;
-        int fp;
-        int fn;
-
-        Metrics() {
-            this->tp = 0;
-            this->tn = 0;
-            this->fp = 0;
-            this->fn = 0;
-        };
-
-        float precision() {
-            return (float)this->tp / (float)(this->tp + this->fp);
-        }
-
-        float recall() {
-            return (float)this->tp / (float)(this->tp + this->fn);
-        }
-
-        float f1_score() {
-            return 2 * (this->precision() * this->recall()) / (this->precision() + this->recall());
-        }
-
-        float accuracy() {
-            return (float)(this->tp + this->tn) / (float)(this->tp + this->fp + this->fn + this->tn);
-        }
-
-        float miou() {
-            return (float)this->tp / (float)(this->tp + this->fp + this->fn);
-        }
-
-        void plotMetrics(){
-            std::cout << "Metrics: " << std::endl;
-            std::cout << "\tPrecision: "  << this->precision() << std::endl;
-            std::cout << "\tRecall: "     << this->recall() << std::endl;
-            std::cout << "\tF1 Score: "   << this->f1_score() << std::endl;
-            std::cout << "\tAccuracy: "   << this->accuracy() << std::endl;
-            std::cout << "\tMIoU: "       << this->miou() << std::endl;
-        }
-    };
-
-    class Console
-    {
-        #define RESET   "\033[0m"
-        #define RED     "\033[31m"
-        #define GREEN   "\033[32m"  
-        #define YELLOW  "\033[33m"
-        #define BLUE    "\033[34m"
-    public:
-        Console();
-
-        /**
-         * @brief Print an info message to the console.
-         * @param msg The message to print.
-         * @param color The color of the message. Default is no color.
-        */
-        void info(const std::string msg, const std::string color = "");
-
-        /**
-         * @brief Print a warning message to the console.
-         * @param msg The message to print.
-         * @param color The color of the message. Default is yellow.
-        */
-        void debug(const std::string msg, const std::string color = "YELLOW");
-
-        bool enable;
-        bool enable_vis; 
-
-        Console::Console()
-        {
-            enable = true;
-            enable_vis = true;
-        }
-
-
-
-        void Console::info(const std::string msg, const std::string color)
-        {
-            
-            if (color == "RED")
-                std::cout << RED;
-            else if (color == "GREEN")
-                std::cout << GREEN;
-            else if (color == "YELLOW")
-                std::cout << YELLOW;
-            else if (color == "BLUE")
-                std::cout << BLUE;
-            else 
-                std::cout << color;
-
-            std::cout << msg << RESET << std::endl;
-        }
-
-
-
-        void Console::debug(const std::string msg, const std::string color)
-        {
-            if (this->enable){
-                if (color == "RED")
-                    std::cout << RED;
-                else if (color == "GREEN")
-                    std::cout << GREEN;
-                else if (color == "YELLOW")
-                    std::cout << YELLOW;
-                else if (color == "BLUE")
-                    std::cout << BLUE;
-                else if (color == "WHITE")
-                    std::cout << RESET;
-                else
-                    std::cout << color;
-
-                std::cout << msg << RESET << std::endl;
-            }
-        }
-        };
-
 }
+#endif // UTILS_HPP
