@@ -4,6 +4,8 @@ project(analytical_rs_seg)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+add_definitions(-DPROJECT_PATH=\"${CMAKE_SOURCE_DIR}\")
+
 
 ## For compilation with ROS Noetic uncomment catkin
 
@@ -71,7 +73,6 @@ endif()
 
 
 add_executable(ground_filter_node src/node.cpp)
-
 if (ROS_BUILD_ENABLE)
   target_link_libraries(ground_filter_node rs_ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
 else()

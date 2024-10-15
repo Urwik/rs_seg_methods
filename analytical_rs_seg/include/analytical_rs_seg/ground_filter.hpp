@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GROUND_FILTER_HPP
+#define GROUND_FILTER_HPP
 
 #include <iostream>
 #include <algorithm>
@@ -7,14 +8,17 @@
 #include <yaml-cpp/yaml.h>
 
 #include "tqdm.hpp"
-
 #include "utils.hpp"
+#include "metrics.hpp"
+#include "console.hpp"
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/ply_io.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/segmentation/extract_clusters.h>
+#include <pcl/common/transforms.h>
+#include <pcl/common/common.h>
 
 namespace fs = std::filesystem;
 
@@ -153,7 +157,8 @@ private:
     void view_final_segmentation();
 };
 
-MODE parse_MODE(const std::string& mode) {
+
+inline MODE parse_MODE(const std::string& mode) {
     if (mode == "wofine") {
         return MODE::WOFINE;
     } else if (mode == "wocoarse_ratio") {
@@ -173,7 +178,7 @@ MODE parse_MODE(const std::string& mode) {
     }
 }
 
-string parse_MODE(MODE mode) {
+inline string parse_MODE(MODE mode) {
     switch (mode) {
         case MODE::WOFINE:
             return "wofine";
@@ -193,3 +198,5 @@ string parse_MODE(MODE mode) {
             return "none";
     }
 }
+
+#endif // GROUND_FILTER_HPP

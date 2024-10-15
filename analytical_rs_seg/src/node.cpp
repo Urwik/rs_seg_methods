@@ -1,22 +1,20 @@
 /* USAGE:
-    * 0. Compile the package with catkin_make
+    * 0. Compile the package with <catkin_make> or <cmake .. && make>
     * 1. Set config.yaml to desired parameters: Mode, Node Length, Node Width, Sac Threshold, Voxel Size
     * 2. Go to the root dir where the clouds are located
-    * 3. Run the following command:  
+    * 3. Run the following command:
+    * if compiled with catkin_make (ROS)  
     * rosrun analytical_rs_seg ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
+    * else if compiled with cmake
+    * ./ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid}
     *   !! If <path_to_cloud> is not set, will apply the algorithm to every cloud found in the current directory !!
     * 
     * Name: Fran Soler Mora
     * email: f.soler@umh.es
  */
 
-#include <ros/package.h>
-#include <pcl/common/common.h>
-#include <yaml-cpp/yaml.h>
-#include <cstdlib> // For std::getenv
 
 #include "analytical_rs_seg/ground_filter.hpp"
-#include "utils.hpp"
 
 
 std::vector<fs::path> get_data_paths(int argc, char **argv)
@@ -49,7 +47,9 @@ std::vector<fs::path> get_data_paths(int argc, char **argv)
     else
     {
         std::cout << "\tNo mode selected." << std::endl;
-        std::cout << "\tUsage: ./ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse}" << std::endl;
+        std::cout << "\tUsage:" << std::endl;
+        std::cout << "\tAdd build folder to the env variable PATH" << std::endl;
+        std::cout << "\tRun ground_filter_node <path_to_cloud> <mode>{ratio, magnitude, hybrid, wofine, wocoarse}" << std::endl;
     }
 
     return path_vector;
@@ -224,7 +224,8 @@ int main(int argc, char **argv)
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     std::cout << YELLOW << "Running Ground Filter Node:" << RESET << std::endl;
 
-    const fs::path CONFIG = "/home/fran/workspaces/arvc_ws/src/analytical_rs_seg/config/config.yaml";
+
+    fs::path CONFIG = fs::path(PROJECT_PATH) / "config/config.yaml";
 
     YAML::Node config = YAML::LoadFile(CONFIG.string());
     
@@ -274,15 +275,14 @@ int main(int argc, char **argv)
     // best_voxel_estimation(path_vector, config);
     // best_density_estimation(path_vector,config);
 
+    std::vector<long> memory_vector;
     auto start = std::chrono::high_resolution_clock::now();
     for (const fs::path &entry : tq::tqdm(path_vector))
     {
-        std::cout << "Memory before loading cloud: " << getMemoryUsageInBytes() << " bytes" << std::endl;
+
+        auto initial_memory = getMemoryUsageInBytes();
         input_cloud_xyzln = utils::readPointCloud<PointIN>(entry);
         pcl::copyPointCloud(*input_cloud_xyzln, *cloud);
-
-
-        std::cout << "Memory after loading cloud: " << getMemoryUsageInBytes() << " bytes" << std::endl;
 
         GroundFilter gf(config);
 
@@ -290,9 +290,6 @@ int main(int argc, char **argv)
         gf.set_input_cloud(cloud);
         gf.compute();
         
-        std::cout << "Memory after filtering: " << getMemoryUsageInBytes() << " bytes" << std::endl;
-
-
         normals_time += gf.normals_time;
         metrics_time += gf.metrics_time;
 
@@ -303,19 +300,23 @@ int main(int argc, char **argv)
             global_metrics.fp += gf.cm.fp;
             global_metrics.fn += gf.cm.fn;
         }
+        auto final_memory = getMemoryUsageInBytes();
+        memory_vector.push_back(final_memory - initial_memory);
     }
 
+    std::cout << "\n\nMETRICS: " << std::endl;
+
     global_metrics.plotMetrics();
-
-    std::cout << "Memory after all computations: " << getMemoryUsageInBytes() << " bytes" << std::endl;
-
 
     // PRINT COMPUTATION TIME
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     int avg_time = (int)floor((duration.count() - metrics_time) / dataset_size);
-    std::cout << "Average Computation Time: " << avg_time << " ms" << std::endl;
+    std::cout << "\tAvg. Computation Time: " << avg_time << " ms" << std::endl;
+
+    long avg_memory = std::accumulate(memory_vector.begin(), memory_vector.end(), 0) / memory_vector.size();
+    std::cout << "\tAvg. Memory Usage: " << avg_memory << " bytes" << std::endl;
 
     return 0;
 }
