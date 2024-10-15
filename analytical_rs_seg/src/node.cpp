@@ -35,7 +35,7 @@ std::vector<fs::path> get_data_paths(int argc, char **argv)
         }
     }
     // COMPUTE THE ALGORITHM ONLY ONE CLOUD PASSED AS ARGUMENT IN CURRENT FOLDER
-    else if (argc == 2)
+    else if (argc > 1)
     {
         fs::path entry = argv[1];
         std::cout << "Processing cloud: " << entry << std::endl;
@@ -233,13 +233,13 @@ int main(int argc, char **argv)
     std::vector<fs::path> path_vector;
     path_vector = get_data_paths(argc, argv);
     
+
     if (config["CROP_SET"].as<int>() != 0)
     {
         path_vector.resize(config["CROP_SET"].as<int>());
     }
 
 
-    std::cout << "\t Evaluating clouds: " << path_vector.size() << std::endl;
 
     // VARIABLES UTILITIES
     utils::Metrics global_metrics;
@@ -260,6 +260,8 @@ int main(int argc, char **argv)
 
     if (argc > 1)
     {
+        auto initial_memory = getMemoryUsageInBytes();
+        auto start = std::chrono::high_resolution_clock::now();
         fs::path entry = argv[1];
         input_cloud_xyzln = utils::readPointCloud<PointIN>(entry);
         pcl::copyPointCloud(*input_cloud_xyzln, *cloud);
@@ -270,12 +272,40 @@ int main(int argc, char **argv)
         gf.set_input_cloud(cloud);
         gf.compute();
 
+        normals_time += gf.normals_time;
+        metrics_time += gf.metrics_time;
+
+        if (config["EN_METRIC"].as<bool>())
+        {
+            global_metrics.tp += gf.cm.tp;
+            global_metrics.tn += gf.cm.tn;
+            global_metrics.fp += gf.cm.fp;
+            global_metrics.fn += gf.cm.fn;
+        }
+
+        auto final_memory = getMemoryUsageInBytes();
+
+        std::cout << "\n\nMETRICS: " << std::endl;
+
+        global_metrics.plotMetrics();
+
+        // PRINT COMPUTATION TIME
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+        int avg_time = (int)floor((duration.count() - metrics_time) / dataset_size);
+        std::cout << "\tAvg. Computation Time: " << avg_time << " ms" << std::endl;
+
+        long avg_memory = final_memory - initial_memory;
+        std::cout << "\tAvg. Memory Usage: " << avg_memory << " bytes" << std::endl;
+
         return 0;
     }
 
     // best_voxel_estimation(path_vector, config);
     // best_density_estimation(path_vector,config);
 
+    std::cout << "\t Evaluating clouds: " << path_vector.size() << std::endl;
     std::vector<long> memory_vector;
     auto start = std::chrono::high_resolution_clock::now();
     for (const fs::path &entry : tq::tqdm(path_vector))
