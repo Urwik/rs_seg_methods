@@ -2,3 +2,8 @@
 analytical_rs_seg/src/utils/
 analytical_rs_seg/build/
 results/
+__pycache__/
+experiments/images/
+test.csv.bak
+test.xlsx
+train.csv
