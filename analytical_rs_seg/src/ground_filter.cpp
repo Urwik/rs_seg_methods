@@ -74,9 +74,9 @@ GroundFilter::GroundFilter(YAML::Node _cfg) {
   this->density_radius = _cfg["DENSITY"]["radius"].as<float>();
   this->density_threshold = _cfg["DENSITY"]["threshold"].as<int>();
 
-  this->enable_euclidean_clustering = _cfg["EUCLID"]["enable"].as<bool>();
-  this->cluster_radius = _cfg["EUCLID"]["radius"].as<float>();
-  this->cluster_min_size = _cfg["EUCLID"]["min_size"].as<int>();
+  this->enable_euclidean_clustering = false; //_cfg["EUCLID"]["enable"].as<bool>();
+  // this->cluster_radius = _cfg["EUCLID"]["radius"].as<float>();
+  // this->cluster_min_size = _cfg["EUCLID"]["min_size"].as<int>();
 
   this->mode = parse_MODE(_cfg["MODE"].as<std::string>());
   this->save_cloud = _cfg["SAVE_CLOUD"].as<bool>();
