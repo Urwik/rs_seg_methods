@@ -9,3 +9,4 @@ test.csv.bak
 test.xlsx
 train.csv
 _**.py
+CATKIN_IGNORE
