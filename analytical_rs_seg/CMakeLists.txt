@@ -78,10 +78,3 @@ if (ROS_BUILD_ENABLE)
 else()
   target_link_libraries(ground_filter_node rs_ground_filter ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
 endif()
-
-
-# add_executable(experiment_queue_node src/utils/experiment_queue_v2.cpp)
-# target_link_libraries(experiment_queue_node rs_ground_filter ${CATKIN_LIBRARIES} ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
-
-# add_executable(experiment_queue_node src/experiment_queue.cpp)
-# target_link_libraries(experiment_queue_node rs_ground_filter ${CATKIN_LIBRARIES} ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
