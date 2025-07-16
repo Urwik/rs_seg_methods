@@ -1,12 +1,12 @@
 .vscode/
-analytical_rs_seg/src/utils/
-analytical_rs_seg/build/
-results/
+build/
 __pycache__/
+_**.py
+CATKIN_IGNORE
+analytical_rs_seg/src/utils/
+results/
 deep_learning/experiments/images/
 deep_learning/models/serialization/
 test.csv.bak
 test.xlsx
 train.csv
-_**.py
-CATKIN_IGNORE
