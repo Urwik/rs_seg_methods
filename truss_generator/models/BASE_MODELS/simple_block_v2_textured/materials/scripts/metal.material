@@ -1,0 +1,15 @@
+material metal
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture steel_diff.png
+	scale 1 1
+      }
+    }
+  }
+}
+

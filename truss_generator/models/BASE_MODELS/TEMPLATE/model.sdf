@@ -1,0 +1,8 @@
+<sdf version='1.7'>
+  <model name='model_name'>
+    <static>1</static>
+    <self_collide>0</self_collide>
+    <enable_wind>0</enable_wind>
+    <allow_auto_disable>1</allow_auto_disable>
+  </model>
+</sdf>

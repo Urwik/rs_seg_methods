@@ -1,0 +1,15 @@
+type: "crossed" # "crossed" or "orthogonal"
+model_name: ""
+node:
+  length: 2.0
+  width: 0.15
+dim:
+  X: 2
+  Y: 2
+  Z: 3
+intercale_dir: true
+unlabeled: true
+textured: true
+shadowed: true
+use_stands: false
+optimize: true

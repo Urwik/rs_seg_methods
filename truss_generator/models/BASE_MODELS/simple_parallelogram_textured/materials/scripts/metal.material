@@ -1,0 +1,16 @@
+material metal
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture steel_diff.png
+        tex_address_mode wrap
+	      scale 1 1
+      }
+    }
+  }
+}
+
