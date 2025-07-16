@@ -1,0 +1,51 @@
+physics: false
+debug: true
+
+generator:
+  paused: false               # User should press enter on each iteration
+  iteration_delay: 1500 #ms   # Delay between iterations in milliseconds
+  items_to_generate: 1000     # Num of paralelepipeds to add
+  ground_name: "ground_geom"  # Name of the groud model 
+
+
+  data:
+    save: true                # flag to save or not generated pointclouds
+    out_dir: "/home/user" # set your own output dir
+    binary: true              # Options: 'binary', 'ascii'  
+
+sensor:
+  name: "os1"                # name of the sensor model in Gazebo
+  topic: "/os1/pointCloud"   # sensor topic where point cloud is published
+  model_path: "/home/user/os1_sensor" # Path to the Gazebo model of the sensor (parent dir of model.sdf & model.config)
+  collision_offset: 0.05     # Minimum distance in meters between the sensor and the truss
+  position:                # initial position of the sensor in the Gazebo world frame
+    x: 0
+    y: 0
+    z: 0.5
+  height: [1, 2]             # [min_height , max_height] for the sensor
+
+paralellepipeds:
+  item_count: 100         # num of paralelepipeds to add
+  model_path: "/home/user/simple_block_v2" # paralelepiped model to add
+  move: true              # move paralelepipeds each iteration
+  label_per_face: true    # if true, each face of the paralelepiped will have a unique label
+  change_iteration: 100   #randomize the models each X iteration. If 0, the models will not change
+  length: [0.4, 3.0]      # [min_length, max_length] for the paralelepipeds
+  width: [0.05, 0.3]      # [min_width, max_width] for the paralelepipeds
+  height: [0.05, 0.3]     # [min_height, max_height] for the paralelepipeds
+  position:
+    min: [-10, -10, -1]   # [min_x, min_y, min_z] for the paralelepipeds in the gazebo world frame
+    max: [10, 10, 5]      # [max_x, max_y, max_z] for the paralelepipeds in the gazebo world frame
+
+environment:
+  item_count: 50          # num of environment models to add
+  model_path: "/home/user/pine_1" # environment model to add
+  move: true              # move environment models each iteration
+  change_iteration: 100   # randomize the models each X iteration. If 0, the models will not change
+  scale: [0.5, 3]         # [min_scale, max_scale] for the environment models
+  length: [0.5, 3]        # [min_length, max_length] for the environment models
+  width: [0.5, 3]         # [min_width, max_width] for the environment models
+  height: [0.5, 3]        # [min_height, max_height] for the environment models
+  position:
+    min: [-50, -50, 0.1]  # [min_x, min_y, min_z] for the environment models in the gazebo world frame
+    max: [50, 50, 0.1]    # [max_x, max_y, max_z] for the environment models in the gazebo world frame
