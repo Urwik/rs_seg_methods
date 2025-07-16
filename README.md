@@ -17,11 +17,80 @@ This repository contains the source code for the segmentation of reticular struc
 
 ## Table of Contents
 - [Repository Structure](#repository-structure)
+- [Requirements](#requirements)
+- [Build](#build)
+- [Usage](#usage)
 - [Analytical](#analytical)
 - [Deep Learning](#deep-learning)
 - [Results](#results)
 - [Credits](#credits)
 - [Citation](#citation)
+
+## Requirements
+
+- Ubuntu 20.04 or later 
+- ROS Noetic (for ROS-based modules)
+- Python 3.8+
+- C++17 compatible compiler (for analytical modules)
+- [PointNet and PointNet++ (PyTorch implementation)](https://github.com/yanx27/Pointnet_Pointnet2_pytorch.git)
+- [MinkowskiEngine](https://github.com/NVIDIA/MinkowskiEngine) (for MinkUNet34C)
+- [Pointcept](https://github.com/Pointcept/Pointcept) (for PointTransformerV3)
+- Additional Python packages: numpy, torch, pyyaml, pandas, matplotlib, etc.
+- Additional Python packages: numpy, torch, pyyaml, pandas, matplotlib, etc.
+
+
+## Build
+### Analytical Methods, Gazebo Generator Plugin, Truss Generator (C++/ROS)
+To build the analytical modules, navigate to your catkin workspace (e.g., `~/catkin_ws`) and run:
+
+```bash
+cd ~/catkin_ws
+catkin_make
+```
+
+### Deep Learning Methods (Python)
+No build step is required, but ensure all dependencies are installed.
+
+## Usage
+
+### Analytical Segmentation
+Run the analytical segmentation node (from your catkin workspace):
+```bash
+rosrun analytical_rs_seg node
+```
+
+### Deep Learning Segmentation
+Train a model:
+```bash
+python3 deep_learning/scripts/train.py 
+```
+Test a model:
+```bash
+python3 deep_learning/scripts/test.py 
+```
+#### PointTransformerV3 (Pointcept)
+
+Train the PointTransformerV3 model:
+```bash
+cd deep_learning/repos/Pointcept
+python3 tools/train_retTruss.py
+```
+Test the PointTransformerV3 model:
+```bash
+python3 tools/test_retTruss.py
+```
+
+### Truss Generation 
+To generate reticular structure models, run:
+```bash
+rosrun truss_generator arvc_build_truss
+```
+
+### Data Generation (Gazebo)
+Launch Gazebo world and plugin for data generation:
+```bash
+roslaunch gazebo_generator_plugin example_train.launch
+```
 
 ## Repository Structure
 The repository is organised into the following main directories:
@@ -94,4 +163,3 @@ If you use this repository or any part of its content in your work, please cite 
 }
 ```
 
----
