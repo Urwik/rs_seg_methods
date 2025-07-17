@@ -16,7 +16,6 @@
 This repository contains the source code for the segmentation of reticular structures using different methods, both analytical and deep learning-based. Data is obtained using a simulated 3D LiDAR sensor. All implemented methods aim to perform binary segmentation of the structures from the background.
 
 ## Table of Contents
-- [Repository Structure](#repository-structure)
 - [Requirements](#requirements)
 - [Build](#build)
 - [Usage](#usage)
@@ -48,7 +47,11 @@ catkin_make
 ```
 
 ### Deep Learning Methods (Python)
-No build step is required, but ensure all dependencies are installed.
+No build step is required, but ensure all dependencies are installed. You can install the required Python packages using:
+
+```bash
+pip install -r deep_learning/requirements.txt
+```
 
 ## Usage
 
