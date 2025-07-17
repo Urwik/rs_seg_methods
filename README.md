@@ -1,8 +1,8 @@
 # Reticular Structures Segmentation Methods
 
 <p align="center">
-    <img src="docs/gazebo_video_to.gif" alt="Gazebo Environment Example" width="45%" style="display:inline-block; margin-right:10px;"/>
-    <img src="docs/rviz_video_to.gif" alt="Segmentation Example Animation" width="45%" style="display:inline-block;"/>
+    <img src="docs/gazebo.gif" alt="Gazebo Environment Example" width="45%" style="display:inline-block; margin-right:10px;"/>
+    <img src="docs/rviz.gif" alt="Segmentation Example Animation" width="45%" style="display:inline-block;"/>
 </p>
 
 <p align="center">
