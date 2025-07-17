@@ -36,7 +36,6 @@ This repository contains the source code for the segmentation of reticular struc
 - [MinkowskiEngine](https://github.com/NVIDIA/MinkowskiEngine) (for MinkUNet34C)
 - [Pointcept](https://github.com/Pointcept/Pointcept) (for PointTransformerV3)
 - Additional Python packages: numpy, torch, pyyaml, pandas, matplotlib, etc.
-- Additional Python packages: numpy, torch, pyyaml, pandas, matplotlib, etc.
 
 
 ## Build
