@@ -5,9 +5,9 @@
     <img src="docs/rviz.gif" alt="Segmentation Example Animation" width="45%" style="display:inline-block;"/>
 </p>
 
-<p align="center">
+<!-- <p align="center">
     <img src="docs/Fig9_dl_crossed_00226_ptv3.png" alt="Deep Learning Segmentation Example" width="90%" style="object-fit:cover; object-position:center; height:180px;"/>
-</p>
+</p> -->
 
 ---
 
