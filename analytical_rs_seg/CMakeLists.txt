@@ -4,12 +4,14 @@ project(analytical_rs_seg)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-add_definitions(-DPROJECT_PATH=\"${CMAKE_SOURCE_DIR}\")
+## Expose this project's source directory (where project() is called)
+## Use PROJECT_SOURCE_DIR to avoid pointing to the top-level superproject
+add_definitions(-DPROJECT_PATH=\"${PROJECT_SOURCE_DIR}\")
 
 
 ## For compilation with ROS Noetic uncomment catkin
 
-set(ROS_BUILD_ENABLE FALSE)
+set(ROS_BUILD_ENABLE TRUE)
 
 
 if (ROS_BUILD_ENABLE)
@@ -45,7 +47,7 @@ if (ROS_BUILD_ENABLE)
   catkin_package(
     INCLUDE_DIRS include
     LIBRARIES rs_ground_filter
-    CATKIN_DEPENDS roscpp rospy roslib arvc_utils
+    CATKIN_DEPENDS roscpp rospy roslib
   )
 endif()
 

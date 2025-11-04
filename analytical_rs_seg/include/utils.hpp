@@ -319,7 +319,7 @@ namespace utils {
      * @return std::vector<pcl::PointIndices> Vector con los indices pertenecientes 
      * a cada agrupación 
      */
-    inline std::pair<std::vector<pcl::PointIndices>, int> regrow_segmentation (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, bool _visualize=false)
+    inline std::pair<std::vector<pcl::PointIndices>, int> regrow_segmentation (PointCloud::Ptr &_cloud_in, pcl::IndicesPtr &_indices, YAML::Node config, const bool _visualize=false)
     {
     // std::cout << "Regrow segmentation a set of indices fomr a cloud" << std::endl;
 
@@ -332,8 +332,14 @@ namespace utils {
     ne.setInputCloud(_cloud_in);
     // ne.setIndices(_indices);   // Tiene que estar comentado para que la dimension de _cloud_normals sea igual a _cloud_in y funcione regrow
     ne.setSearchMethod(tree);
-    ne.setKSearch(30);            // Por vecinos no existen normales NaN
-    // ne.setRadiusSearch(0.05);  // Por radio existiran puntos cuya normal sea NaN
+
+    if (config["knn"].as<int>() > 0 && config["search_radius"].as<float>() <= 0)
+        ne.setKSearch(config["knn"].as<int>());            // Por vecinos no existen normales NaN 30 original
+    else if (config["search_radius"].as<float>() > 0 && config["knn"].as<int>() <= 0)
+        ne.setRadiusSearch(config["search_radius"].as<float>());  // Por radio existiran puntos cuya normal sea NaN
+    else
+        ne.setKSearch(30);            // Default value
+
     ne.compute(*_cloud_normals);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
@@ -341,7 +347,7 @@ namespace utils {
     // Segmentación basada en crecimiento de regiones
     std::vector<pcl::PointIndices> _regrow_clusters;
     pcl::RegionGrowing<PointT, pcl::Normal> reg;
-    reg.setMinClusterSize (50); //50 original
+    reg.setMinClusterSize (config["min_cluster_size"].as<int>()); //50 original
     reg.setMaxClusterSize (25000);
     reg.setSearchMethod (tree);
     reg.setSmoothModeFlag(false);
@@ -358,30 +364,34 @@ namespace utils {
     // RESULTS VISUALIZATION 
     if(_visualize)
     {
-        pcl::visualization::PCLVisualizer vis ("Regrow Visualizer");
-
-        int v1(0);
-        int v2(0);
-
-        vis.setBackgroundColor(1,1,1);
-        try
-        {
-        vis.loadCameraParameters("camera_params_regrow_clusters.txt");
-        /* code */
-        }
-        catch(const std::exception& e)
-        {
-        }
+        pcl::visualization::PCLVisualizer vis ("Clustering Visualizer");
         
+        //2 viewports Normals and clusters
+        // int v1(0);
+        // int v2(0);
+        // vis.createViewPort(0,0,0.5,1, v1);
+        // vis.createViewPort(0.5,0,1,1, v2);
 
-        //Define ViewPorts
-        vis.createViewPort(0,0,0.5,1, v1);
-        pcl::visualization::PointCloudColorHandlerCustom<PointT> green_color(_cloud_in, 10, 150, 10);
-        vis.addPointCloud<PointT>(_cloud_in, green_color, "cloud", v1);
-        vis.addPointCloudNormals<PointT, pcl::Normal>(_cloud_in, _cloud_normals, 5, 0.1, "normals", v1);
+        // pcl::visualization::PointCloudColorHandlerCustom<PointT> green_color(_cloud_in, 10, 150, 10);
+        // vis.addPointCloud<PointT>(_cloud_in, green_color, "cloud", v1);
+        // vis.addPointCloudNormals<PointT, pcl::Normal>(_cloud_in, _cloud_normals, 5, 0.1, "normals", v1);
 
 
-        vis.createViewPort(0.5,0,1,1, v2);
+        // pcl::PointCloud<pcl::PointXYZRGB>::Ptr color_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+        // color_cloud = reg.getColoredCloud();
+
+        // pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+        // extract.setInputCloud(color_cloud);
+        // pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+        // inliers->indices = *_indices;
+        // extract.setIndices(inliers);
+        // extract.setNegative(false);
+        // extract.filter(*color_cloud);
+
+        // vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments", v2);
+
+
+        // Single viewport colored clusters
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr color_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
         color_cloud = reg.getColoredCloud();
 
@@ -393,13 +403,23 @@ namespace utils {
         extract.setNegative(false);
         extract.filter(*color_cloud);
 
-        vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments",v2);
+        vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments");
 
 
+        try
+        {
+            vis.loadCameraParameters("camera_params_regrow_clusters.txt");
+        }
+        catch(const std::exception& e)
+        {
+        }
+        
+        vis.setBackgroundColor(1,1,1);
+        
         while (!vis.wasStopped())
         {
-        vis.saveCameraParameters("camera_params_regrow_clusters.txt");
-        vis.spinOnce();
+            vis.saveCameraParameters("camera_params_regrow_clusters.txt");
+            vis.spinOnce();
         }
     }
     return std::pair<std::vector<pcl::PointIndices>, int> {_regrow_clusters, duration.count()};

@@ -224,8 +224,9 @@ int main(int argc, char **argv)
 
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     std::cout << YELLOW << "Running Ground Filter Node:" << RESET << std::endl;
+    std::cout << PROJECT_PATH << std::endl;
 
-
+    
     fs::path CONFIG = fs::path(PROJECT_PATH) / "config/config.yaml";
 
     YAML::Node config = YAML::LoadFile(CONFIG.string());
@@ -240,6 +241,7 @@ int main(int argc, char **argv)
     }
 
 
+    std::sort(path_vector.begin(), path_vector.end());
 
     // VARIABLES UTILITIES
     utils::Metrics global_metrics;

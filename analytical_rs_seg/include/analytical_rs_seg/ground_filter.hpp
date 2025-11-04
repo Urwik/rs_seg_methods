@@ -20,6 +20,7 @@
 #include <pcl/common/transforms.h>
 #include <pcl/common/common.h>
 
+
 namespace fs = std::filesystem;
 
 using namespace std;
@@ -32,6 +33,20 @@ enum class MODE{
     WOCOARSE_RATIO,
     WOCOARSE_MAGNITUDE,
     WOCOARSE_HYBRID
+};
+
+struct ConfusionMatrixIndexes {
+    pcl::IndicesPtr tp;
+    pcl::IndicesPtr tn;
+    pcl::IndicesPtr fp;
+    pcl::IndicesPtr fn;
+
+    ConfusionMatrixIndexes() {
+        tp = pcl::IndicesPtr(new pcl::Indices);
+        tn = pcl::IndicesPtr(new pcl::Indices);
+        fp = pcl::IndicesPtr(new pcl::Indices);
+        fn = pcl::IndicesPtr(new pcl::Indices);
+    }
 };
 
 class GroundFilter
@@ -115,12 +130,12 @@ public:
     void set_sac_threshold(float _threshold);
 
     void set_voxel_size(float _voxel_size);
-
-    int compute();
-
+    
     void save_cloud_result();
-
+    
     float get_ground_data_ratio();
+    
+    int compute();
 
 private:
 
@@ -151,6 +166,8 @@ private:
      * @return Returns the TP, FP, FN, TN indexes
     */
     void getConfMatrixIndexes();
+
+    ConfusionMatrixIndexes getConfMatrixIndexes(pcl::IndicesPtr &_pred_truss_idx, pcl::IndicesPtr &_pred_ground_idx);
 
     void compute_metrics();
 
