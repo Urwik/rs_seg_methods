@@ -4,9 +4,12 @@ __pycache__/
 _**.py
 CATKIN_IGNORE
 analytical_rs_seg/src/utils/
-results/
+**results/
 deep_learning/experiments/images/
 deep_learning/models/serialization/
 test.csv.bak
 test.xlsx
 train.csv
+assets/
+**.mp4
+docs/shotcut_project**
