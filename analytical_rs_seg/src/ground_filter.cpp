@@ -99,44 +99,44 @@ void GroundFilter::fine_segmentation()
 		this->coarse_truss_idx->insert(this->coarse_truss_idx->end(), this->regrow_clusters[clus_indx].indices.begin(), this->regrow_clusters[clus_indx].indices.end());
 
 
-	if (this->cons.enable_vis)
-	{
-		this->cons.debug("Visualizing fine segmentation", "GREEN");
-		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("FINE SEGMENTATION - " + this->cloud_id));
+	// if (this->cons.enable_vis)
+	// {
+	// 	this->cons.debug("Visualizing fine segmentation", "GREEN");
+	// 	pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("FINE SEGMENTATION - " + this->cloud_id));
 
-		ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
-		pcl::PointCloud<pcl::PointXYZ>::Ptr tp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-		pcl::PointCloud<pcl::PointXYZ>::Ptr tn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-		pcl::PointCloud<pcl::PointXYZ>::Ptr fp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-		pcl::PointCloud<pcl::PointXYZ>::Ptr fn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	// 	ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
+	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr tp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr tn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr fp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr fn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-		viewer->setBackgroundColor(1, 1, 1);
+	// 	viewer->setBackgroundColor(1, 1, 1);
 
-		pcl::ExtractIndices<pcl::PointXYZ> extract;
-		extract.setInputCloud(this->cloud_in);
-		extract.setNegative(false);
+	// 	pcl::ExtractIndices<pcl::PointXYZ> extract;
+	// 	extract.setInputCloud(this->cloud_in);
+	// 	extract.setNegative(false);
 
-		extract.setIndices(cm_indexes.tp);
-		extract.filter(*tp_cloud);
-		extract.setIndices(cm_indexes.tn);
-		extract.filter(*tn_cloud);
-		extract.setIndices(cm_indexes.fp);
-		extract.filter(*fp_cloud);
-		extract.setIndices(cm_indexes.fn);
-		extract.filter(*fn_cloud);
+	// 	extract.setIndices(cm_indexes.tp);
+	// 	extract.filter(*tp_cloud);
+	// 	extract.setIndices(cm_indexes.tn);
+	// 	extract.filter(*tn_cloud);
+	// 	extract.setIndices(cm_indexes.fp);
+	// 	extract.filter(*fp_cloud);
+	// 	extract.setIndices(cm_indexes.fn);
+	// 	extract.filter(*fn_cloud);
 
-		viewer->addCoordinateSystem(1.5);
+	// 	viewer->addCoordinateSystem(1.5);
 
-		viewer->addPointCloud<pcl::PointXYZ>(tp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tp_cloud, 50, 190, 50), "TP Cloud");
-		viewer->addPointCloud<pcl::PointXYZ>(tn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tn_cloud, 100, 100, 100), "TN Cloud");
-		viewer->addPointCloud<pcl::PointXYZ>(fp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fp_cloud, 200, 10, 10), "FP Cloud");
-		viewer->addPointCloud<pcl::PointXYZ>(fn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fn_cloud, 100, 100, 100), "FN Cloud");
+	// 	viewer->addPointCloud<pcl::PointXYZ>(tp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tp_cloud, 50, 190, 50), "TP Cloud");
+	// 	viewer->addPointCloud<pcl::PointXYZ>(tn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tn_cloud, 100, 100, 100), "TN Cloud");
+	// 	viewer->addPointCloud<pcl::PointXYZ>(fp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fp_cloud, 200, 10, 10), "FP Cloud");
+	// 	viewer->addPointCloud<pcl::PointXYZ>(fn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fn_cloud, 100, 100, 100), "FN Cloud");
 
-		while (!viewer->wasStopped())
-		{
-			viewer->spinOnce();
-		}
-	}
+	// 	while (!viewer->wasStopped())
+	// 	{
+	// 		viewer->spinOnce();
+	// 	}
+	// }
 	
 }
 
