@@ -20,8 +20,8 @@ DENSITY:
 
 REGROW:
   min_cluster_size: 20
-  knn: 0 #30
-  search_radius: 0.05 #0.05
+  knn: 30 #30
+  search_radius: 0.0 #0.05
 # TODO:
 # ITERATIONS: 10
 # START_VOXEL: 0.05
