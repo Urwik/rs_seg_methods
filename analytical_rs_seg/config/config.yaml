@@ -1,27 +1,40 @@
-EN_DEBUG: true
+EN_DEBUG: false
 EN_VISUAL: true
 VIEW_FINAL_SEGMENTATION: false
-EN_METRIC: false
+EN_METRIC: true
+
 SAVE_CLOUD: false
 SAVE_CLOUD_PATH: "/home/arvc/workspaces/arvc_ws/src/rs_seg_methods/analytical_rs_seg/results/crossed/"
 
 MODE: "hybrid" # ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magnitude, wocoarse_hybrid
 NODE_LENGTH: 2
 NODE_WIDTH: 0.15
+
 SAC_THRESHOLD: 0.5 
-VOXEL_SIZE: 0.1 
+VOXEL_SIZE: 0.15 
 CROP_SET: 0
 
 DENSITY:
   first: false # NOT WORKING
-  enable: false
+  enable: true
   radius: 0.25 
   threshold: 10 
+  visualize: false
+
+COARSE:
+  visualize: false
 
 REGROW:
-  min_cluster_size: 20
-  knn: 30 #30
-  search_radius: 0.0 #0.05
+  visualize: true
+  min_cluster_size: 10
+  knn: 30 # 30
+  search_radius: 0.0 # 0.05 CAREFULL, TOO MANY NAN NORMALS
+  smoothness: 5.0 #degrees
+
+FINE:
+  visualize: false
+
+
 # TODO:
 # ITERATIONS: 10
 # START_VOXEL: 0.05

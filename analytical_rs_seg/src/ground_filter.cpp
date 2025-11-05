@@ -15,67 +15,67 @@ void GroundFilter::coarse_segmentation()
 	this->coarse_ground_idx = coarse_indices.first;
 	this->coarse_truss_idx = coarse_indices.second;
 
-	// if (this->cons.enable_vis)
-	// {
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_ground(new pcl::PointCloud<pcl::PointXYZ>);
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_truss(new pcl::PointCloud<pcl::PointXYZ>);
+	if (this->cfg["COARSE"]["visualize"].as<bool>() && this->cons.enable_vis)
+	{
+		pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_ground(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_truss(new pcl::PointCloud<pcl::PointXYZ>);
 
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr wrong_truss_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr wrong_truss_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-	// 	ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
+		ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
 
-	// 	pcl::ExtractIndices<pcl::PointXYZ> extract;
-	// 	extract.setInputCloud(this->cloud_in);
-	// 	extract.setIndices(this->coarse_ground_idx);
-	// 	extract.setNegative(false);
-	// 	extract.filter(*coarse_ground);
+		pcl::ExtractIndices<pcl::PointXYZ> extract;
+		extract.setInputCloud(this->cloud_in);
+		extract.setIndices(this->coarse_ground_idx);
+		extract.setNegative(false);
+		extract.filter(*coarse_ground);
 
-	// 	extract.setIndices(this->coarse_truss_idx);
-	// 	extract.filter(*coarse_truss);
+		extract.setIndices(this->coarse_truss_idx);
+		extract.filter(*coarse_truss);
 
-	// 	extract.setIndices(cm_indexes.fp);
-	// 	extract.filter(*wrong_truss_cloud);
+		extract.setIndices(cm_indexes.fp);
+		extract.filter(*wrong_truss_cloud);
 
-	// 	this->cons.debug("Visualizing coarse segmentation", "GREEN");
-	// 	pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("COARSE SEGMENTATION - " + this->cloud_id));
-
-
-	// 	// Dual Viewports
-	// 	// int v1(0);
-	// 	// int v2(1);
-	// 	// viewer->createViewPort(0.0, 0.0, 0.5, 1.0, v1);
-	// 	// viewer->createViewPort(0.5, 0.0, 1.0, 1.0, v2);
-	// 	// viewer->setBackgroundColor(1, 1, 1);
-
-	// 	// viewer->addPointCloud<pcl::PointXYZ>(coarse_ground, ground_color, "coarse_ground", v1);
-	// 	// viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss", v1);
-
-	// 	// viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss", v2);
-	// 	// viewer->addPointCloud<pcl::PointXYZ>(wrong_truss_cloud, wrong_color, "wrong_truss", v2);
+		this->cons.debug("Visualizing coarse segmentation", "GREEN");
+		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("COARSE SEGMENTATION - " + this->cloud_id));
 
 
-	// 	// viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_ground", v1);
-	// 	// viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_truss", v1);
+		// Dual Viewports
+		// int v1(0);
+		// int v2(1);
+		// viewer->createViewPort(0.0, 0.0, 0.5, 1.0, v1);
+		// viewer->createViewPort(0.5, 0.0, 1.0, 1.0, v2);
+		// viewer->setBackgroundColor(1, 1, 1);
 
-	// 	// Single Viewport
-	// 	viewer->setBackgroundColor(1, 1, 1);
-	// 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ground_color(coarse_ground, 100, 100, 100);
-	// 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> truss_color(coarse_truss, 50, 190, 50);
-	// 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> wrong_color(wrong_truss_cloud, 200, 10, 10);
+		// viewer->addPointCloud<pcl::PointXYZ>(coarse_ground, ground_color, "coarse_ground", v1);
+		// viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss", v1);
 
-	// 	// viewer->addPointCloud<pcl::PointXYZ>(this->cloud_in, "cloud");
+		// viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss", v2);
+		// viewer->addPointCloud<pcl::PointXYZ>(wrong_truss_cloud, wrong_color, "wrong_truss", v2);
 
-	// 	viewer->addPointCloud<pcl::PointXYZ>(coarse_ground, ground_color, "coarse_ground");
-	// 	viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss");
 
-	// 	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_ground");
-	// 	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_truss");
+		// viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_ground", v1);
+		// viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_truss", v1);
 
-	// 	while (!viewer->wasStopped())
-	// 	{
-	// 		viewer->spinOnce();
-	// 	}
-	// }
+		// Single Viewport
+		viewer->setBackgroundColor(1, 1, 1);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ground_color(coarse_ground, 100, 100, 100);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> truss_color(coarse_truss, 50, 190, 50);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> wrong_color(wrong_truss_cloud, 200, 10, 10);
+
+		// viewer->addPointCloud<pcl::PointXYZ>(this->cloud_in, "cloud");
+
+		viewer->addPointCloud<pcl::PointXYZ>(coarse_ground, ground_color, "coarse_ground");
+		viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss");
+
+		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_ground");
+		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_truss");
+
+		while (!viewer->wasStopped())
+		{
+			viewer->spinOnce();
+		}
+	}
 }
 
 void GroundFilter::fine_segmentation()
@@ -85,9 +85,9 @@ void GroundFilter::fine_segmentation()
 	std::pair<vector<pcl::PointIndices>, int> regrow_output;
 
 	if (this->coarse_ground_idx->size() > 0)
-		regrow_output = utils::regrow_segmentation(this->cloud_in, this->coarse_ground_idx, this->cfg["REGROW"], true);
+		regrow_output = utils::regrow_segmentation(this->cloud_in, this->coarse_ground_idx, this->cfg["REGROW"], this->cfg["REGROW"]["visualize"].as<bool>());
 	else
-		regrow_output = utils::regrow_segmentation(this->cloud_in, true);
+		regrow_output = utils::regrow_segmentation(this->cloud_in, this->cfg["REGROW"]["visualize"].as<bool>());
 
 	this->regrow_clusters = regrow_output.first;
 	this->normals_time = regrow_output.second;
@@ -99,44 +99,44 @@ void GroundFilter::fine_segmentation()
 		this->coarse_truss_idx->insert(this->coarse_truss_idx->end(), this->regrow_clusters[clus_indx].indices.begin(), this->regrow_clusters[clus_indx].indices.end());
 
 
-	// if (this->cons.enable_vis)
-	// {
-	// 	this->cons.debug("Visualizing fine segmentation", "GREEN");
-	// 	pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("FINE SEGMENTATION - " + this->cloud_id));
+	if (this->cfg["FINE"]["visualize"].as<bool>() && this->cons.enable_vis)
+	{
+		this->cons.debug("Visualizing fine segmentation", "GREEN");
+		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("FINE SEGMENTATION - " + this->cloud_id));
 
-	// 	ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr tp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr tn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr fp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	// 	pcl::PointCloud<pcl::PointXYZ>::Ptr fn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr tp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr tn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr fp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr fn_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-	// 	viewer->setBackgroundColor(1, 1, 1);
+		viewer->setBackgroundColor(1, 1, 1);
 
-	// 	pcl::ExtractIndices<pcl::PointXYZ> extract;
-	// 	extract.setInputCloud(this->cloud_in);
-	// 	extract.setNegative(false);
+		pcl::ExtractIndices<pcl::PointXYZ> extract;
+		extract.setInputCloud(this->cloud_in);
+		extract.setNegative(false);
 
-	// 	extract.setIndices(cm_indexes.tp);
-	// 	extract.filter(*tp_cloud);
-	// 	extract.setIndices(cm_indexes.tn);
-	// 	extract.filter(*tn_cloud);
-	// 	extract.setIndices(cm_indexes.fp);
-	// 	extract.filter(*fp_cloud);
-	// 	extract.setIndices(cm_indexes.fn);
-	// 	extract.filter(*fn_cloud);
+		extract.setIndices(cm_indexes.tp);
+		extract.filter(*tp_cloud);
+		extract.setIndices(cm_indexes.tn);
+		extract.filter(*tn_cloud);
+		extract.setIndices(cm_indexes.fp);
+		extract.filter(*fp_cloud);
+		extract.setIndices(cm_indexes.fn);
+		extract.filter(*fn_cloud);
 
-	// 	viewer->addCoordinateSystem(1.5);
+		viewer->addCoordinateSystem(1.5);
 
-	// 	viewer->addPointCloud<pcl::PointXYZ>(tp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tp_cloud, 50, 190, 50), "TP Cloud");
-	// 	viewer->addPointCloud<pcl::PointXYZ>(tn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tn_cloud, 100, 100, 100), "TN Cloud");
-	// 	viewer->addPointCloud<pcl::PointXYZ>(fp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fp_cloud, 200, 10, 10), "FP Cloud");
-	// 	viewer->addPointCloud<pcl::PointXYZ>(fn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fn_cloud, 100, 100, 100), "FN Cloud");
+		viewer->addPointCloud<pcl::PointXYZ>(tp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tp_cloud, 50, 190, 50), "TP Cloud");
+		viewer->addPointCloud<pcl::PointXYZ>(tn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(tn_cloud, 100, 100, 100), "TN Cloud");
+		viewer->addPointCloud<pcl::PointXYZ>(fp_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fp_cloud, 200, 10, 10), "FP Cloud");
+		viewer->addPointCloud<pcl::PointXYZ>(fn_cloud, pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>(fn_cloud, 100, 100, 100), "FN Cloud");
 
-	// 	while (!viewer->wasStopped())
-	// 	{
-	// 		viewer->spinOnce();
-	// 	}
-	// }
+		while (!viewer->wasStopped())
+		{
+			viewer->spinOnce();
+		}
+	}
 	
 }
 
@@ -194,7 +194,7 @@ void GroundFilter::density_filter()
 	this->ground_idx = utils::inverseIndices(this->cloud_in, this->truss_idx);
 	// }
 
-	if (this->cons.enable_vis)
+	if (this->cfg["DENSITY"]["visualize"].as<bool>())
 	{
 		this->cons.debug("Visualizing density segmentation", "GREEN");
 		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("DENSITY SEGMENTATION - " + this->cloud_id));

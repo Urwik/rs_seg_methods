@@ -80,3 +80,8 @@ if (ROS_BUILD_ENABLE)
 else()
   target_link_libraries(ground_filter_node rs_ground_filter ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
 endif()
+
+if (ROS_BUILD_ENABLE)
+  add_executable(run_experiment_queue src/experiment_queue_v2.cpp)
+  target_link_libraries(run_experiment_queue rs_ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
+endif()

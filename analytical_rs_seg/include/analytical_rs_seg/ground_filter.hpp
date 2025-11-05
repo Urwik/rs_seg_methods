@@ -69,6 +69,7 @@ public:
     YAML::Node cfg;
     string cloud_id;
     fs::path save_cloud_path;
+    string dataset_id;
 
     vector<pcl::PointIndices> regrow_clusters;
     vector<pcl::PointIndices> euclid_clusters;

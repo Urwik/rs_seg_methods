@@ -388,7 +388,6 @@ int main(int argc, char **argv)
     auto start = std::chrono::high_resolution_clock::now();
     for (const fs::path &entry : tq::tqdm(path_vector))
     {
-        std::cout << "\nProcessing cloud: " << entry.stem() << std::endl;
         auto initial_memory = getMemoryUsageInBytes();
         input_cloud_xyzln = utils::readPointCloud<PointIN>(entry);
         pcl::copyPointCloud(*input_cloud_xyzln, *cloud);

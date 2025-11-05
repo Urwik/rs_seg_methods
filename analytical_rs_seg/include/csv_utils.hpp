@@ -15,30 +15,30 @@ namespace fs = std::filesystem;
 
 struct csv_data
 {
-    string experiment_id;
-    string set_id;
-    int set_size;
-    float precision, recall, f1_score, accuracy, miou;
-    int tp, tn, fp, fn;
-    int exec_time;
-    int ground_size;
-    int truss_size;
+    string experiment_id = "none";
+    string set_id = "none";
+    int set_size = 0;
+    float precision = 0, recall = 0, f1_score = 0, accuracy = 0, miou = 0;
+    int tp = 0, tn = 0, fp = 0, fn = 0;
+    int exec_time = 0;
+    int ground_size = 0;
+    int truss_size = 0;
     
     std::string mode;
-    float node_length;
-    float node_width;
-    float sac_threshold;
-    float voxel_size;
-    int crop_set;
+    float node_length = 0;
+    float node_width = 0;
+    float sac_threshold = 0;
+    float voxel_size = 0;
+    int crop_set = 0;
     
-    bool density_first;
-    bool density_enable;
-    float density_radius;
-    int density_threshold;
+    bool density_first = false;
+    bool density_enable = false;
+    float density_radius = 0;
+    int density_threshold = 0;
     
-    bool euclid_enable;
-    float euclid_radius;
-    int euclid_min_size;
+    bool euclid_enable = false;
+    float euclid_radius = 0;
+    int euclid_min_size = 0;
 };
 
 
