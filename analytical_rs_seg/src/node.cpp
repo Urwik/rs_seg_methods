@@ -17,6 +17,7 @@
 
 #include "analytical_rs_seg/ground_filter.hpp"
 
+typedef pcl::PointXYZLNormal PointIN;
 
 std::vector<fs::path> get_data_paths(int argc, char **argv)
 {
@@ -81,7 +82,6 @@ void best_density_estimation(std::vector<fs::path> path_vector, YAML::Node confi
 {
 
     #include <map>
-    typedef pcl::PointXYZLNormal PointIN;
 
     // VARIABLES UTILITIES
     utils::Metrics global_metrics;
@@ -217,11 +217,86 @@ void best_voxel_estimation(std::vector<fs::path> path_vector, YAML::Node config)
 }
 
 
+bool valid_cloud_ratio(pcl::PointCloud<PointIN>::Ptr &_cloud)
+{
+    int truss_points = 0;
+    int ground_points = 0;
+
+    for (const auto &point : _cloud->points)
+    {
+        if (point.label > 0)
+            truss_points++;
+        else
+            ground_points++;
+    }
+
+    float ratio = (float)truss_points / (float)(_cloud->points.size());
+    std::cout << "Cloud ratio of truss: " << ratio << std::endl;
+
+    if (ratio < 0.3 || ratio > 0.9)
+        return false;
+    else
+        return true;
+}
+
+void validate_clouds(std::vector<fs::path> path_vector)
+{
+    std::ofstream file;
+    fs::path current_dir = fs::current_path();
+
+    if (!fs::exists(current_dir / "invalid_clouds_ratio_of_truss.txt"))
+        file.open(current_dir / "invalid_clouds_ratio_of_truss.txt");
+    else
+        file.open(current_dir / "invalid_clouds_ratio_of_truss.txt", std::ios_base::app);
+
+
+    std::set<fs::path> valid_clouds;
+    for (const fs::path &entry : path_vector)
+    {
+        pcl::PointCloud<PointIN>::Ptr temp_cloud (new pcl::PointCloud<PointIN>);
+        temp_cloud = utils::readPointCloud<PointIN>(entry);
+
+        if (valid_cloud_ratio(temp_cloud))
+            valid_clouds.insert(entry);
+        else
+        {
+            std::cout << "Invalid cloud ratio of truss: " << entry.stem() << std::endl;
+            file << entry.stem() << std::endl;
+        }
+    }
+    file.close();
+}
+
+void visualize_invalid_clouds(const fs::path& file_path)
+{
+    fs::path current_dir = fs::current_path();
+    pcl::PointCloud<PointIN>::Ptr input_cloud_xyzln (new pcl::PointCloud<PointIN>);
+    std::ifstream file(current_dir / "invalid_clouds_ratio_of_truss.txt");  // Open the file
+    if (!file.is_open()) {
+        std::cerr << "Error opening file" << std::endl;
+        return;
+    }
+
+    std::string line;
+    pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("INVALID CLOUD VIEWER"));
+    // viewer->setBackgroundColor(1, 1, 1);
+    while (std::getline(file, line)) {  // Read line by line
+        fs::path tmp_path = current_dir / (line + ".ply");
+        
+        std::cout << "Viewing invalid cloud: " << tmp_path.string() << std::endl;
+        input_cloud_xyzln = utils::readPointCloud<PointIN>(tmp_path);
+
+
+        viewer->removeAllPointClouds();
+        viewer->addPointCloud<pcl::PointXYZLNormal>(input_cloud_xyzln, "invalid_cloud");
+
+        viewer->spin();
+    }
+    file.close();  // Close the file
+}
+
 int main(int argc, char **argv)
 {
-    typedef pcl::PointXYZLNormal PointIN;
-    
-
     pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
     std::cout << YELLOW << "Running Ground Filter Node:" << RESET << std::endl;
     std::cout << PROJECT_PATH << std::endl;
@@ -233,6 +308,7 @@ int main(int argc, char **argv)
     
     std::vector<fs::path> path_vector;
     path_vector = get_data_paths(argc, argv);
+    fs::path current_dir = fs::current_path();
     
 
     if (config["CROP_SET"].as<int>() != 0)
@@ -312,7 +388,7 @@ int main(int argc, char **argv)
     auto start = std::chrono::high_resolution_clock::now();
     for (const fs::path &entry : tq::tqdm(path_vector))
     {
-
+        std::cout << "\nProcessing cloud: " << entry.stem() << std::endl;
         auto initial_memory = getMemoryUsageInBytes();
         input_cloud_xyzln = utils::readPointCloud<PointIN>(entry);
         pcl::copyPointCloud(*input_cloud_xyzln, *cloud);
@@ -337,6 +413,7 @@ int main(int argc, char **argv)
         memory_vector.push_back(final_memory - initial_memory);
     }
 
+    // file.close();
     std::cout << "\n\nMETRICS: " << std::endl;
 
     global_metrics.plotMetrics();
