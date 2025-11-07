@@ -136,7 +136,7 @@ void experiment(YAML::Node config, std::vector<fs::path> path_vector){
 
     fs::path package_path("/home/arvc/workspaces/arvc_ws/src/rs_seg_methods/analytical_rs_seg");
 
-    writeToCSV(fs::path( package_path / "results" / "resultados_preliminares_5_nov_25"), data);
+    writeToCSV(fs::path( package_path / "results" / "resultados_6_nov_25"), data);
 }
 
 

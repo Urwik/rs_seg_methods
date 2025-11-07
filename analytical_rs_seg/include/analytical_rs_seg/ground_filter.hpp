@@ -136,6 +136,8 @@ public:
     
     float get_ground_data_ratio();
     
+    ConfusionMatrixIndexes getConfMatrixIndexes(pcl::IndicesPtr &_pred_truss_idx, pcl::IndicesPtr &_pred_ground_idx);
+
     int compute();
 
 private:
@@ -167,8 +169,6 @@ private:
      * @return Returns the TP, FP, FN, TN indexes
     */
     void getConfMatrixIndexes();
-
-    ConfusionMatrixIndexes getConfMatrixIndexes(pcl::IndicesPtr &_pred_truss_idx, pcl::IndicesPtr &_pred_ground_idx);
 
     void compute_metrics();
 

@@ -1,5 +1,5 @@
 EN_DEBUG: false
-EN_VISUAL: true
+EN_VISUAL: false
 VIEW_FINAL_SEGMENTATION: false
 EN_METRIC: true
 
@@ -25,14 +25,18 @@ COARSE:
   visualize: false
 
 REGROW:
-  visualize: true
-  min_cluster_size: 10
-  knn: 30 # 30
-  search_radius: 0.0 # 0.05 CAREFULL, TOO MANY NAN NORMALS
-  smoothness: 5.0 #degrees
+  normals:
+    knn: 30 # 30
+    search_radius: 0.0 # 0.05 CAREFULL, TOO MANY NAN NORMALS 0.1 good
+
+  visualize: false
+  min_cluster_size: 15
+  num_neighbors: 20 # (original 30)
+  curvature_th: 1.0 # (original 1.0)
+  smoothness: 25.0 # degrees (original 10.0)
 
 FINE:
-  visualize: false
+  visualize: true
 
 
 # TODO:

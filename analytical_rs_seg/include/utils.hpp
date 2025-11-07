@@ -80,6 +80,10 @@ namespace utils {
         int tn;
         int fp;
         int fn;
+
+        bool operator==(const ConfusionMatrix& other) const {
+            return (tp == other.tp) && (tn == other.tn) && (fp == other.fp) && (fn == other.fn);
+        }
     };
 
 
@@ -331,10 +335,10 @@ namespace utils {
         // ne.setIndices(_indices);   // Tiene que estar comentado para que la dimension de _cloud_normals sea igual a _cloud_in y funcione regrow
         ne.setSearchMethod(tree);
 
-        if (config["knn"].as<int>() > 0 && config["search_radius"].as<float>() <= 0)
-            ne.setKSearch(config["knn"].as<int>());            // Por vecinos no existen normales NaN 30 original
-        else if (config["search_radius"].as<float>() > 0 && config["knn"].as<int>() <= 0)
-            ne.setRadiusSearch(config["search_radius"].as<float>());  // Por radio existiran puntos cuya normal sea NaN
+        if (config["normals"]["knn"].as<int>() > 0 && config["normals"]["search_radius"].as<float>() <= 0)
+            ne.setKSearch(config["normals"]["knn"].as<int>());            // Por vecinos no existen normales NaN 30 original
+        else if (config["normals"]["search_radius"].as<float>() > 0 && config["normals"]["knn"].as<int>() <= 0)
+            ne.setRadiusSearch(config["normals"]["search_radius"].as<float>());  // Por radio existiran puntos cuya normal sea NaN
         else
             ne.setKSearch(30);            // Default value
 
@@ -351,19 +355,19 @@ namespace utils {
             }
         }
 
-        std::cout << "Number of NaN normals: " << num_nan_normals << " out of " << _cloud_normals->points.size() << std::endl;
+        // std::cout << "Number of NaN normals: " << num_nan_normals << " out of " << _cloud_normals->points.size() << std::endl;
 
         // Segmentación basada en crecimiento de regiones
         std::vector<pcl::PointIndices> _regrow_clusters;
         pcl::RegionGrowing<PointT, pcl::Normal> reg;
         reg.setMinClusterSize (config["min_cluster_size"].as<int>()); //50 original
-        reg.setMaxClusterSize (25000);
+        reg.setMaxClusterSize (20000);
         reg.setSearchMethod (tree);
         reg.setSmoothModeFlag(false);
         reg.setCurvatureTestFlag(true);
         reg.setResidualThreshold(false);
-        reg.setCurvatureThreshold(1); // Lower values lead to more points excluded
-        reg.setNumberOfNeighbours (10); //10 original
+        reg.setCurvatureThreshold(config["curvature_th"].as<float>()); // Lower values lead to more points excluded
+        reg.setNumberOfNeighbours (config["num_neighbors"].as<int>()); //10 original
         reg.setInputCloud (_cloud_in);
         reg.setIndices(_indices);
         reg.setInputNormals (_cloud_normals);
@@ -375,51 +379,36 @@ namespace utils {
         {
             pcl::visualization::PCLVisualizer vis ("Clustering Visualizer");
             
-            // 2 viewports Normals and clusters
-            int v1(0);
-            int v2(0);
-            vis.createViewPort(0,0,0.5,1, v1);
-            vis.createViewPort(0.5,0,1,1, v2);
+            // // 2 viewports Normals and clusters
+            // int v1(0);
+            // int v2(0);
+            // vis.createViewPort(0,0,0.5,1, v1);
+            // vis.createViewPort(0.5,0,1,1, v2);
 
 
-            pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::ExtractIndices<pcl::PointXYZ> extract1;
-            extract1.setInputCloud(_cloud_in);
-            pcl::PointIndices::Ptr inliers1 (new pcl::PointIndices);
-            inliers1->indices = *_indices;
-            extract1.setIndices(inliers1);
-            extract1.setNegative(false);
-            extract1.filter(*coarse_cloud);
+            // pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+            // pcl::ExtractIndices<pcl::PointXYZ> extract1;
+            // extract1.setInputCloud(_cloud_in);
+            // pcl::PointIndices::Ptr inliers1 (new pcl::PointIndices);
+            // inliers1->indices = *_indices;
+            // extract1.setIndices(inliers1);
+            // extract1.setNegative(false);
+            // extract1.filter(*coarse_cloud);
 
-            // Extract normals with the same indices
-            pcl::PointCloud<pcl::Normal>::Ptr coarse_normals (new pcl::PointCloud<pcl::Normal>);
-            pcl::ExtractIndices<pcl::Normal> extract_normals;
-            extract_normals.setInputCloud(_cloud_normals);
-            extract_normals.setIndices(inliers1);
-            extract_normals.setNegative(false);
-            extract_normals.filter(*coarse_normals);
+            // // Extract normals with the same indices
+            // pcl::PointCloud<pcl::Normal>::Ptr coarse_normals (new pcl::PointCloud<pcl::Normal>);
+            // pcl::ExtractIndices<pcl::Normal> extract_normals;
+            // extract_normals.setInputCloud(_cloud_normals);
+            // extract_normals.setIndices(inliers1);
+            // extract_normals.setNegative(false);
+            // extract_normals.filter(*coarse_normals);
 
-            pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green_color(coarse_cloud, 10, 150, 10);
-            vis.addPointCloud<pcl::PointXYZ>(coarse_cloud, green_color, "cloud", v1);
-            vis.addPointCloudNormals<pcl::PointXYZ, pcl::Normal>(coarse_cloud, coarse_normals, 5, 0.1, "normals", v1);
-            vis.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 0.0, "normals");  // Black normals
-            vis.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "normals");
+            // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green_color(coarse_cloud, 10, 150, 10);
+            // vis.addPointCloud<pcl::PointXYZ>(coarse_cloud, green_color, "cloud", v1);
+            // vis.addPointCloudNormals<pcl::PointXYZ, pcl::Normal>(coarse_cloud, coarse_normals, 5, 0.1, "normals", v1);
+            // vis.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 0.0, 0.0, "normals");  // Black normals
+            // vis.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "normals");
 
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr color_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-            color_cloud = reg.getColoredCloud();
-
-            pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-            extract.setInputCloud(color_cloud);
-            pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-            inliers->indices = *_indices;
-            extract.setIndices(inliers);
-            extract.setNegative(false);
-            extract.filter(*color_cloud);
-
-            vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments", v2);
-
-
-            // Single viewport colored clusters
             // pcl::PointCloud<pcl::PointXYZRGB>::Ptr color_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
             // color_cloud = reg.getColoredCloud();
 
@@ -431,21 +420,42 @@ namespace utils {
             // extract.setNegative(false);
             // extract.filter(*color_cloud);
 
-            // vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments");
+            // vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments", v2);
+
+
+            // Single viewport colored clusters
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr color_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+            color_cloud = reg.getColoredCloud();
+
+            pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+            extract.setInputCloud(color_cloud);
+            pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+            inliers->indices = *_indices;
+            extract.setIndices(inliers);
+            extract.setNegative(false);
+            extract.filter(*color_cloud);
+
+            vis.addPointCloud<pcl::PointXYZRGB>(color_cloud, "Regrow Segments");
+            vis.setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 6, "Regrow Segments");
 
             try
             {
-                vis.loadCameraParameters("camera_params_regrow_clusters.txt");
+                vis.loadCameraParameters("cam_regrow.cam");
+                std::cout << "Loaded camera parameters from file." << '\n';
+
             }
             catch(const std::exception& e)
             {
+                std::cerr << "Could not load camera parameters, starting with default view." << '\n';
             }
             
             vis.setBackgroundColor(1,1,1);
+            // vis.setBackgroundColor(0,0,0, v1);
+            // vis.setBackgroundColor(1,1,1, v2);
             
             while (!vis.wasStopped())
             {
-                vis.saveCameraParameters("camera_params_regrow_clusters.txt");
+                vis.saveCameraParameters("cam_regrow.cam");
                 vis.spinOnce();
             }
         }

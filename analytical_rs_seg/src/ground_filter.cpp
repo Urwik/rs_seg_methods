@@ -580,7 +580,7 @@ GroundFilter::GroundFilter(YAML::Node _cfg)
 	this->save_cloud = _cfg["SAVE_CLOUD"].as<bool>();
 	this->save_cloud_path = _cfg["SAVE_CLOUD_PATH"].as<std::string>();
 
-	std::cout << "GroundFilter configured in mode: " << parse_MODE(this->mode) << std::endl;
+	this->cons.debug("GroundFilter configured in mode: " + parse_MODE(this->mode), "GREEN");
 
 	this->cloud_id = "NO_ID";
 }
