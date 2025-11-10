@@ -138,6 +138,10 @@ public:
     
     ConfusionMatrixIndexes getConfMatrixIndexes(pcl::IndicesPtr &_pred_truss_idx, pcl::IndicesPtr &_pred_ground_idx);
 
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr get_regrow_output();
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr get_coarse_segmentation();
+
     int compute();
 
 private:

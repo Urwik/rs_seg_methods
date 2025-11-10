@@ -361,7 +361,7 @@ namespace utils {
         std::vector<pcl::PointIndices> _regrow_clusters;
         pcl::RegionGrowing<PointT, pcl::Normal> reg;
         reg.setMinClusterSize (config["min_cluster_size"].as<int>()); //50 original
-        reg.setMaxClusterSize (20000);
+        reg.setMaxClusterSize (_cloud_in->points.size());
         reg.setSearchMethod (tree);
         reg.setSmoothModeFlag(false);
         reg.setCurvatureTestFlag(true);

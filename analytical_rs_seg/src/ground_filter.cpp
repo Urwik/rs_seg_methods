@@ -659,6 +659,70 @@ float GroundFilter::get_ground_data_ratio()
 	return (float)this->gt_ground_idx->size() / ((float)this->gt_ground_idx->size() + (float)this->gt_truss_idx->size());
 }
 
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr GroundFilter::get_regrow_output(){
+
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr regrow_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+	for (size_t i = 0; i < this->regrow_clusters.size(); i++)
+	{
+		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+		
+		uint8_t r = rand() % 256;
+		uint8_t g = rand() % 256;
+		uint8_t b = rand() % 256;
+
+		for (size_t j = 0; j < this->regrow_clusters[i].indices.size(); j++)
+		{
+			pcl::PointXYZRGB point;
+			point.x = this->cloud_in->points[this->regrow_clusters[i].indices[j]].x;
+			point.y = this->cloud_in->points[this->regrow_clusters[i].indices[j]].y;
+			point.z = this->cloud_in->points[this->regrow_clusters[i].indices[j]].z;
+			point.r = r;
+			point.g = g;	
+			point.b = b;
+			cluster_cloud->points.push_back(point);
+		}
+
+		*regrow_cloud += *cluster_cloud;
+	}
+
+	return regrow_cloud;
+}
+
+
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr GroundFilter::get_coarse_segmentation()
+{
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr coarse_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+	pcl::copyPointCloud(*this->cloud_in, *coarse_cloud);
+
+	for (size_t i = 0; i < coarse_cloud->points.size(); i++)
+	{
+		auto it_truss = std::find(this->coarse_truss_idx->begin(), this->coarse_truss_idx->end(), i);
+		auto it_ground = std::find(this->coarse_ground_idx->begin(), this->coarse_ground_idx->end(), i);
+
+		if (it_truss != this->coarse_truss_idx->end())
+		{
+			coarse_cloud->points[i].r = 100;
+			coarse_cloud->points[i].g = 100;
+			coarse_cloud->points[i].b = 100;
+		}
+		else if (it_ground != this->coarse_ground_idx->end())
+		{
+			coarse_cloud->points[i].r = 200;
+			coarse_cloud->points[i].g = 200;
+			coarse_cloud->points[i].b = 50;
+		}
+		else
+		{
+			coarse_cloud->points[i].r = 200;
+			coarse_cloud->points[i].g = 10;
+			coarse_cloud->points[i].b = 10;
+		}
+
+	}
+
+	return coarse_cloud;
+}
 int GroundFilter::compute()
 {
 	switch (this->mode)
