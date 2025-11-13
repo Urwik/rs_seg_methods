@@ -11,7 +11,7 @@
 namespace fs = std::filesystem;
 
 
-    std::string csv_header = "EXPERIMENT_ID,MODE,SET,NODE_LENGTH,NODE_WIDTH,SAC_THRESHOLD,VOXEL_SIZE,CROP_SET,SET_SIZE,PRECISION,RECALL,F1_SCORE,ACCURACY,MIOU,TP,TN,FP,FN,EXEC_TIME,GROUND_SIZE,TRUSS_SIZE,ENABLE_DENSITY,DENSITY_FIRST,DENSITY_RADIUS,DENSITY_THRESHOLD,ENABLE_EUCLID,EUCLID_RADIUS,EUCLID_MIN_SIZE";
+    std::string csv_header = "EXPERIMENT_ID,MODE,SET,NODE_LENGTH,NODE_WIDTH,SAC_THRESHOLD,VOXEL_SIZE,RAT_TH,MAG_TH,CROP_SET,SET_SIZE,PRECISION,RECALL,F1_SCORE,ACCURACY,MIOU,TP,TN,FP,FN,EXEC_TIME,GROUND_SIZE,TRUSS_SIZE,ENABLE_DENSITY,DENSITY_FIRST,DENSITY_RADIUS,DENSITY_THRESHOLD,ENABLE_EUCLID,EUCLID_RADIUS,EUCLID_MIN_SIZE";
 
 struct csv_data
 {
@@ -39,6 +39,9 @@ struct csv_data
     bool euclid_enable = false;
     float euclid_radius = 0;
     int euclid_min_size = 0;
+
+    float magnitude_threshold = 0;
+    float ratio_threshold = 0;
 };
 
 
@@ -78,6 +81,8 @@ void writeToCSV(const fs::path& dir_path, const csv_data& data) {
     csv_file << data.node_width << ",";
     csv_file << data.sac_threshold << ",";
     csv_file << data.voxel_size << ",";
+    csv_file << data.ratio_threshold << ",";
+    csv_file << data.magnitude_threshold << ",";
     csv_file << data.crop_set << ",";
 
     csv_file << data.set_size << ",";

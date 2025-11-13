@@ -35,7 +35,6 @@ std::vector<fs::path> get_data_paths(fs::path root_dir)
 }
 
 
-
 std::pair<float, float> compute_criteria_values(pcl::PointCloud<PointIN>::Ptr &_cloud, pcl::IndicesPtr &_indices)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud_xyz(new pcl::PointCloud<pcl::PointXYZ>);
@@ -80,6 +79,7 @@ std::pair<float, float> compute_criteria_values(pcl::PointCloud<PointIN>::Ptr &_
     return std::pair<float, float> {ratio, magnitude};
 
 }
+
 
 void find_differences(YAML::Node config, std::vector<fs::path> path_vector){
 
@@ -163,6 +163,8 @@ void find_differences(YAML::Node config, std::vector<fs::path> path_vector){
 
 void view_differences(YAML::Node config, const fs::path& cloud_path){
 
+    std::cout << "VIEWING DIFFERENCES IN CLOUD: " << cloud_path.stem().string() << std::endl;
+
     pcl::PointCloud<PointIN>::Ptr input_cloud_xyzln (new pcl::PointCloud<PointIN>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZL>::Ptr cloud_hyb (new pcl::PointCloud<pcl::PointXYZL>);
@@ -175,7 +177,9 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
 
 
     input_cloud_xyzln = utils::readPointCloud<PointIN>(cloud_path);
+    pcl::copyPointCloud(*input_cloud_xyzln, *input_cloud_xyz);
 
+    ////////////////////////////////
     // GROUND_FILTER_HYBRID
     pcl::copyPointCloud(*input_cloud_xyzln, *cloud_hyb);
     config["MODE"] = "hybrid";
@@ -183,7 +187,7 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
 
     gf_hyb.set_input_cloud(cloud_hyb);
     gf_hyb.cloud_id = cloud_path.stem().string();
-    // gf_hyb.dataset_id = "";
+    gf_hyb.dataset_id = "";
     gf_hyb.compute();
 
     ConfusionMatrixIndexes cm_hyb = gf_hyb.getConfMatrixIndexes(gf_hyb.truss_idx, gf_hyb.ground_idx);
@@ -231,6 +235,8 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
         hyb_seg->points.push_back(point);
     }
 
+
+    ////////////////////////////////
     // GROUND_FILTER_MAGNITUDE
     pcl::copyPointCloud(*input_cloud_xyzln, *cloud_mag);
     config["MODE"] = "magnitude";
@@ -238,17 +244,9 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
 
     gf_mag.set_input_cloud(cloud_mag);
     gf_mag.cloud_id = cloud_path.stem().string();
-    // gf_mag.dataset_id = set_id;
+    gf_mag.dataset_id = "";
     gf_mag.compute();
     ConfusionMatrixIndexes cm_mag = gf_mag.getConfMatrixIndexes(gf_mag.truss_idx, gf_mag.ground_idx);
-
-    // Regrow output could be extracted from any method, as it is the same
-    regrow_output = gf_mag.get_regrow_output();
-    coarse_output = gf_mag.get_coarse_segmentation();
-
-    std::vector<pcl::PointIndices> regrow_clusters = gf_mag.regrow_clusters;
-
-
 
     // Build MAG SEGMENTATION CLOUD rgb
     for (size_t idx =0; idx < cloud_mag->points.size(); idx++) {
@@ -291,6 +289,12 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
         }
         mag_seg->points.push_back(point);
     }
+    
+    
+    // Regrow output could be extracted from any method, as it is the same
+    regrow_output = gf_mag.get_regrow_output();
+    coarse_output = gf_mag.get_coarse_segmentation();
+    auto regrow_clusters = gf_mag.regrow_clusters;
 
     // IF DIFFERENT, VIEW
     if (!(gf_hyb.cm == gf_mag.cm)) {
@@ -310,7 +314,7 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
         int v4(3);
         viewer->createViewPort(0.0, 0.0, 0.5, 0.5, v1);
         viewer->createViewPort(0.5, 0.0, 1.0, 0.5, v2);
-        viewer->createViewPort(0.0, 0.5, 1.0, 1.0, v3);
+        viewer->createViewPort(0.0, 0.5, 0.5, 1.0, v3);
         viewer->createViewPort(0.5, 0.5, 1.0, 1.0, v4);
 
         viewer->setBackgroundColor(1,1,1);
@@ -322,9 +326,25 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
 
         std::vector<std::pair<float, float>> criteria_values;
     
+        std::cout << "Adding REGROW clusters to viewer..." << std::endl;
         for (size_t i = 0; i < regrow_clusters.size(); i++) {
-            pcl::IndicesPtr cluster_indices(new pcl::Indices(regrow_clusters[i].indices));
-            auto clust_cloud = utils::extract_indices(input_cloud_xyz, cluster_indices); 
+
+            pcl::IndicesPtr cluster_indices (new pcl::Indices);
+            *cluster_indices = regrow_clusters[i].indices;
+
+            for (size_t idx = 0; idx < cluster_indices->size(); idx++) {
+                assert((*cluster_indices)[idx] < input_cloud_xyzln->points.size() && "Cluster index out of bounds!");
+            }
+
+
+            pcl::PointCloud<pcl::PointXYZ>::Ptr clust_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+            pcl::ExtractIndices<pcl::PointXYZ> extractor;
+            extractor.setInputCloud(input_cloud_xyz);
+            extractor.setIndices(cluster_indices);
+            extractor.setNegative(false);
+            extractor.filter(*clust_cloud); 
+
+            assert(clust_cloud->points.size() > 0 && "Cluster cloud has no points!");
             
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster_rgb(new pcl::PointCloud<pcl::PointXYZRGB>);
             pcl::copyPointCloud(*clust_cloud, *cluster_rgb);
@@ -342,16 +362,26 @@ void view_differences(YAML::Node config, const fs::path& cloud_path){
             auto values = compute_criteria_values(input_cloud_xyzln, cluster_indices);
 
             viewer->addPointCloud<pcl::PointXYZRGB>(cluster_rgb, "cluster_" + std::to_string(i), v2);
-            viewer->addText3D("R: " + std::to_string(values.first).substr(0,6) + " M: " + std::to_string(values.second).substr(0,6), cluster_rgb->points[0], 0.1, 0.0, 0.0, 0.0, "text_cluster_" + std::to_string(i), v2);
 
+            pcl::PointXYZ centroid;
+            Eigen::Vector4f centroid_eig;
+            pcl::compute3DCentroid(*cluster_rgb, centroid_eig);
+            centroid.x = centroid_eig[0];
+            centroid.y = centroid_eig[1];
+            centroid.z = centroid_eig[2];
 
+            viewer->addText3D("R: " + std::to_string(values.first).substr(0,6) + " M: " + std::to_string(values.second).substr(0,6), centroid, 0.1, 0.0, 0.0, 0.0, "text_cluster_" + std::to_string(i), v2);
 
             criteria_values.push_back(values);
         }
 
+
+        std::cout << "Adding COARSE output to viewer..." << std::endl;
         viewer->addPointCloud<pcl::PointXYZRGB>(coarse_output, "coarse_output", v1);
         // viewer->addPointCloud<pcl::PointXYZRGB>(regrow_output, "regrow_output", v2);
+        std::cout << "Adding MAGNITUDE output to viewer..." << std::endl;
         viewer->addPointCloud<pcl::PointXYZRGB>(mag_seg, "mag_seg", v3);
+        std::cout << "Adding HYBRID output to viewer..." << std::endl;
         viewer->addPointCloud<pcl::PointXYZRGB>(hyb_seg, "hyb_seg", v4);
 
         while (!viewer->wasStopped ())

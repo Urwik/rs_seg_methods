@@ -21,6 +21,7 @@ void GroundFilter::coarse_segmentation()
 		pcl::PointCloud<pcl::PointXYZ>::Ptr coarse_truss(new pcl::PointCloud<pcl::PointXYZ>);
 
 		pcl::PointCloud<pcl::PointXYZ>::Ptr wrong_truss_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr wrong_ground_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
 		ConfusionMatrixIndexes cm_indexes = this->getConfMatrixIndexes(this->coarse_truss_idx, this->coarse_ground_idx);
 
@@ -35,6 +36,9 @@ void GroundFilter::coarse_segmentation()
 
 		extract.setIndices(cm_indexes.fp);
 		extract.filter(*wrong_truss_cloud);
+
+		extract.setIndices(cm_indexes.fn);
+		extract.filter(*wrong_ground_cloud);
 
 		this->cons.debug("Visualizing coarse segmentation", "GREEN");
 		pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("COARSE SEGMENTATION - " + this->cloud_id));
@@ -59,16 +63,22 @@ void GroundFilter::coarse_segmentation()
 
 		// Single Viewport
 		viewer->setBackgroundColor(1, 1, 1);
-		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ground_color(coarse_ground, 100, 100, 100);
-		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> truss_color(coarse_truss, 50, 190, 50);
-		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> wrong_color(wrong_truss_cloud, 200, 10, 10);
+		// Thesis palette
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ground_color(coarse_ground, 71, 126, 99);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> truss_color(coarse_truss, 100, 100, 100);
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> wrong_color(wrong_ground_cloud, 57, 211, 136);
+
+		// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ground_color(coarse_ground, 100, 100, 100);
+		// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> truss_color(coarse_truss, 50, 190, 50);
+		// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> wrong_color(wrong_truss_cloud, 200, 10, 10);
 
 		// viewer->addPointCloud<pcl::PointXYZ>(this->cloud_in, "cloud");
 
 		viewer->addPointCloud<pcl::PointXYZ>(coarse_ground, ground_color, "coarse_ground");
 		viewer->addPointCloud<pcl::PointXYZ>(coarse_truss, truss_color, "coarse_truss");
+		viewer->addPointCloud<pcl::PointXYZ>(wrong_ground_cloud, wrong_color, "wrong_ground");
 
-		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_ground");
+		// viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_ground");
 		viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "coarse_truss");
 
 		while (!viewer->wasStopped())
@@ -723,12 +733,15 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr GroundFilter::get_coarse_segmentation()
 
 	return coarse_cloud;
 }
+
+
 int GroundFilter::compute()
 {
 	switch (this->mode)
 	{
 	case MODE::RATIO:
-		this->ratio_threshold = this->node_width / this->sac_threshold;
+		// this->ratio_threshold = this->node_width / this->sac_threshold;
+		this->ratio_threshold = this->cfg["RAT_TH"].as<float>();
 		this->coarse_segmentation();
 		this->fine_segmentation();
 		this->update_segmentation();
@@ -742,7 +755,8 @@ int GroundFilter::compute()
 		break;
 
 	case MODE::MAGNITUDE:
-		this->magnitude_threshold = this->sac_threshold;
+		// this->magnitude_threshold = this->sac_threshold;
+		this->magnitude_threshold = this->cfg["MAG_TH"].as<float>();
 		this->coarse_segmentation();
 		this->fine_segmentation();
 		this->update_segmentation();
@@ -755,8 +769,11 @@ int GroundFilter::compute()
 		break;
 
 	case MODE::HYBRID:
-		this->ratio_threshold = this->node_width / this->sac_threshold;
-		this->magnitude_threshold = this->sac_threshold;
+		// this->ratio_threshold = this->node_width / this->sac_threshold;
+		// this->magnitude_threshold = this->sac_threshold;
+		this->ratio_threshold = this->cfg["RAT_TH"].as<float>();
+		this->magnitude_threshold = this->cfg["MAG_TH"].as<float>();
+
 		this->coarse_segmentation();
 		this->fine_segmentation();
 		this->update_segmentation();

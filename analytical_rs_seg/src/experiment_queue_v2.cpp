@@ -91,6 +91,8 @@ void experiment(YAML::Node config, std::vector<fs::path> path_vector){
     data.set_id = set_id;
     data.set_size = path_vector.size();
     data.precision = global_metrics.precision();
+    data.ratio_threshold = config["RAT_TH"].as<float>();
+    data.magnitude_threshold = config["MAG_TH"].as<float>();
     data.recall = global_metrics.recall();
     data.f1_score = global_metrics.f1_score();
     data.accuracy = global_metrics.accuracy();
@@ -135,8 +137,17 @@ void experiment(YAML::Node config, std::vector<fs::path> path_vector){
     // fs::path package_path(package_path_str);
 
     fs::path package_path("/home/arvc/workspaces/arvc_ws/src/rs_seg_methods/analytical_rs_seg");
+    YAML::Emitter out;
+    out << config;
 
-    writeToCSV(fs::path( package_path / "results" / "resultados_6_nov_25"), data);
+    fs::path results_path = package_path / "results" / "resultados_10_nov_25";
+    
+    std::ofstream config_file;
+    config_file.open(results_path.string() + "/config_used.yaml");
+    config_file << out.c_str();
+    config_file.close();
+
+    writeToCSV(results_path, data);
 }
 
 
@@ -155,7 +166,7 @@ int main(int argc, char **argv)
 
     // const std::vector<std::string> DATASETS = {"orto", "crossed", "00", "01", "02", "03"};
     const std::vector<std::string> DATASETS = {"orthogonal", "crossed"};
-    const std::vector<std::string> MODES = {"ratio", "module", "hybrid", "wofine", "wocoarse_ratio", "wocoarse_module", "wocoarse_hybrid"};
+    const std::vector<std::string> MODES = {"ratio", "magnitude", "hybrid", "wofine", "wocoarse_ratio", "wocoarse_magnitude", "wocoarse_hybrid"};
 
     
     YAML::Node config = YAML::LoadFile(CONFIG.string());

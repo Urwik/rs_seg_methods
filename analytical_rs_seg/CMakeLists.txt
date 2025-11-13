@@ -87,6 +87,6 @@ if (ROS_BUILD_ENABLE)
 endif()
 
 if (ROS_BUILD_ENABLE)
-  add_executable(find_methods_difference src/find_method_differences_in_clouds.cpp)
-  target_link_libraries(find_methods_difference rs_ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
+  add_executable(find_method_differences_in_clouds src/find_method_differences_in_clouds.cpp)
+  target_link_libraries(find_method_differences_in_clouds rs_ground_filter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Eigen3_LIBRARIES} ${YAML_CPP_LIBRARIES})
 endif()

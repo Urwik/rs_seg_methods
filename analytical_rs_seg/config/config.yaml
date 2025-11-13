@@ -1,5 +1,5 @@
 EN_DEBUG: false
-EN_VISUAL: false
+EN_VISUAL: true
 VIEW_FINAL_SEGMENTATION: false
 EN_METRIC: true
 
@@ -10,9 +10,14 @@ MODE: "hybrid" # ratio, magnitude, hybrid, wofine, wocoarse_ratio, wocoarse_magn
 NODE_LENGTH: 2
 NODE_WIDTH: 0.15
 
-SAC_THRESHOLD: 0.5 
+SAC_THRESHOLD: 0.8 
 VOXEL_SIZE: 0.15 
 CROP_SET: 0
+
+RAT_TH: 0.3
+MAG_TH: 1.4
+
+
 
 DENSITY:
   first: false # NOT WORKING
@@ -22,7 +27,7 @@ DENSITY:
   visualize: false
 
 COARSE:
-  visualize: false
+  visualize: true
 
 REGROW:
   normals:
