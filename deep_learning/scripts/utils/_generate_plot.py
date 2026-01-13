@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
-sys.path.append("/home/fran/workspaces/nn_ws/binary_segmentation")
+sys.path.append("/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/")
 
 from engines.utils.csv_parser import csvTestStruct
 from engines.utils.graphics_plotter import GraphicsPlotter
@@ -15,14 +15,7 @@ if __name__ == '__main__':
     HUE_LABEL = 'MODEL'
 
     plotter = GraphicsPlotter()
-    plotter.set_source_file("/home/fran/workspaces/nn_ws/binary_segmentation/experiments/test.csv")
-    
-    plotter.filter('DATASET_DIR', 'test', negative=True)
-    plotter.filter('DATASET_DIR', '00', negative=True)
-    plotter.filter('DATASET_DIR', '01', negative=True)
-    plotter.filter('DATASET_DIR', '02', negative=True)
-    plotter.filter('DATASET_DIR', '03', negative=True)
-    
+    plotter.set_source_file("/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/best_dl_results.csv")
     
     if MODEL_NAME != '':
         plotter.filter('MODEL', MODEL_NAME)
@@ -99,7 +92,11 @@ if __name__ == '__main__':
     # plotter.feat_vs_metric(horizontal=True)
     # plotter.voxel_analysis()
     # plotter.inference_time()
-    plotter.feat_vs_metric_roc_pr()
+    # plotter.feat_vs_metric_roc_pr()
+    # plotter.feat_vs_metric_roc_pr_thesis()
+    # plotter.feat_vs_metric_roc_pr_thesis_vertical()
+    plotter.feat_vs_metric_roc_pr_comparison_vertical()
+    
     # plotter.train_efficiency()
     # plotter.inference_efficiency()
     # plotter.feat_vs_metric_orto_crossed_roc_pr()

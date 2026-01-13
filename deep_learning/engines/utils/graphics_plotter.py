@@ -24,7 +24,7 @@ ANSI_END = "\033[0m"
 class GraphicsPlotter():
     def __init__(self):
         self.fig, self.ax = plt.subplots()
-        self.df = self._get_data()
+        # self.df = self._get_data()
         self.x = None
         self.y = None
         self.hue = None
@@ -668,15 +668,424 @@ class GraphicsPlotter():
                                 ha='left', va='center', 
                                 fontsize=12, weight='bold')  # Negrita
 
+    def feat_vs_metric_roc_pr_thesis(self, method='max'):
         
+        DATASET_TYPE = 'crossed'
+        
+        
+        
+        
+        TITLES_SIZE = 16
+        ANNOTATION_SIZE = 12
+        
+        # Map model names to display names
+        MODEL_NAME_MAP = {
+            'PointNetBinSeg': 'PointNet',
+            'PointNet2BinSeg': 'PointNet++',
+            'PointTrasnformerV3': 'PointTransformerV3',
+            'MinkUNet34C': 'MinkUNet34C'
+        }
+        
+        HUE_ORDER = ['PointTransformerV3', 'MinkUNet34C', 'PointNet++', 'PointNet']
+        HUE_ORDER = HUE_ORDER[::-1]
+        
+        
+        self.image_name = 'feat_vs_metric_roc_pr' +'_' + DATASET_TYPE
+
+        # ------------------------------
+        # PREPARE DATA
+        # ------------------------------
+        DATASET_ID = 'arvc_truss/test/' + DATASET_TYPE
+        self.df = self.df[self.df['DATASET_DIR'] == DATASET_ID]
+        
+        # Rename models to display names
+        self.df['MODEL'] = self.df['MODEL'].replace(MODEL_NAME_MAP)
+        
+        print(f"\nDataset filtered for: {DATASET_ID}")
+        print(f"Total rows after dataset filter: {len(self.df)}")
+        print(f"Unique models in data: {self.df['MODEL'].unique()}")
+        print(f"Unique features in data: {self.df['FEATURES'].unique()}")
+     
+        df_pr = self.df[self.df['THRESHOLD_METHOD'] == 'pr'] 
+        df_roc = self.df[self.df['THRESHOLD_METHOD'] == 'roc']
+        
+        print(f"PR rows: {len(df_pr)}, Models: {df_pr['MODEL'].unique()}")
+        print(f"ROC rows: {len(df_roc)}, Models: {df_roc['MODEL'].unique()}")
+
+
+        # ------------------------------
+        # PLOT FIGURE
+        # ------------------------------
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.27, 4), sharey=True)
+
+        ax1 = sns.barplot(x='MIOU', y='FEATURES', hue='MODEL', data=df_pr, errorbar=None, palette='viridis', hue_order=HUE_ORDER, orient='h', ax=ax1)
+        
+        ax2 = sns.barplot(x='MIOU', y='FEATURES', hue='MODEL', data=df_roc, errorbar=None, palette='viridis', hue_order=HUE_ORDER, orient='h', ax=ax2)
+
+        axes = [ax1, ax2]
+        data = pd.concat([df_pr, df_roc])
+        
+        
+        self.annotate_max_value_new(axes=axes, data=data)
+
+        ax1.set_title('PR', fontsize=TITLES_SIZE)
+        ax2.set_title('ROC', fontsize=TITLES_SIZE)
+        ax1.set_ylim(0.5, 1)
+        ax2.set_ylim(0.5, 1)
+        ax1.set_xlim(0.25, 1)
+        ax2.set_xlim(0.25, 1)
+        
+        # Remapear los nombres de los ticks del eje Y
+        new_labels = ['V+N', 'V+C', 'V', 'N', 'C']  # Define los nuevos nombres
+        new_labels = new_labels[::-1]
+        ax1.set_yticklabels(new_labels, fontsize=12)  # Cambia las etiquetas del eje Y para ax1
+        ax2.set_yticklabels(new_labels, fontsize=12)  # Cambia las etiquetas del eje Y para ax2
+
+        ax1.set_ylabel('')
+        ax2.set_ylabel('')
+        ax1.set_xlabel('')
+        ax2.set_xlabel('')
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        # Aumentar tamaño de los ticks del eje Y    
+        ax1.tick_params(axis='y', labelsize=TITLES_SIZE)
+        ax2.tick_params(axis='y', labelsize=TITLES_SIZE)
+        ax1.tick_params(axis='x', labelsize=TITLES_SIZE-2)
+        ax2.tick_params(axis='x', labelsize=TITLES_SIZE-2)
+        ax2.tick_params(labelleft=False)
+
+        # Obtener los manejadores de la leyenda (solo de ax1)
+        handles, labels = ax1.get_legend_handles_labels()
+        
+
+        # Invertir el orden de los manejadores y las etiquetas de la leyenda
+        handles = handles[::-1]
+        labels = labels[::-1]
+        
+        # Quitar leyenda individual de los subplots
+        
+        if ax1.get_legend():
+            ax1.get_legend().remove()
+        # ax1.legend_.remove()
+        
+        if ax2.get_legend():
+            ax2.get_legend().remove()
+        # ax2.legend_.remove()
+
+        # Colocar la leyenda fuera de los gráficos
+        fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=2, prop={'size': TITLES_SIZE})
+
+        # Ajustar layout
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+
+        ax1.autoscale()
+        ax2.autoscale()
+        
+        ax1.xaxis.set_major_formatter(PercentFormatter(1))
+        ax2.xaxis.set_major_formatter(PercentFormatter(1))
+
+        plt.subplots_adjust(wspace=0.1)  # Aumenta el espacio entre los ejes
+
+        print(f'Figure saved as {self.image_name}.png')
+        print(f'Figure saved as {self.image_name}.eps')
+        # Guardar la figura
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
+
+    def feat_vs_metric_roc_pr_thesis_vertical(self, method='max'):
+        
+        DATASET_TYPE = 'orthogonal'
+        TEXT_SCALE = 0.8
+        
+        TITLES_SIZE = 16 * TEXT_SCALE
+        ANNOTATION_SIZE = 12 * TEXT_SCALE
+        
+        # Map model names to display names
+        MODEL_NAME_MAP = {
+            'PointNetBinSeg': 'PointNet',
+            'PointNet2BinSeg': 'PointNet++',
+            'PointTrasnformerV3': 'PointTransformerV3',
+            'MinkUNet34C': 'MinkUNet34C'
+        }
+        
+        HUE_ORDER = ['PointTransformerV3', 'MinkUNet34C', 'PointNet++', 'PointNet']
+        HUE_ORDER = HUE_ORDER[::-1]
+        
+        self.image_name = 'feat_vs_metric_roc_pr_vertical_' + DATASET_TYPE
+
+        # ------------------------------
+        # PREPARE DATA
+        # ------------------------------
+        DATASET_ID = 'arvc_truss/test/' + DATASET_TYPE
+        self.df = self.df[self.df['DATASET_DIR'] == DATASET_ID]
+        
+        # Rename models to display names
+        self.df['MODEL'] = self.df['MODEL'].replace(MODEL_NAME_MAP)
+        
+        print(f"\nDataset filtered for: {DATASET_ID}")
+        print(f"Total rows after dataset filter: {len(self.df)}")
+        print(f"Unique models in data: {self.df['MODEL'].unique()}")
+        print(f"Unique features in data: {self.df['FEATURES'].unique()}")
+     
+        df_pr = self.df[self.df['THRESHOLD_METHOD'] == 'pr'] 
+        df_roc = self.df[self.df['THRESHOLD_METHOD'] == 'roc']
+        
+        print(f"PR rows: {len(df_pr)}, Models: {df_pr['MODEL'].unique()}")
+        print(f"ROC rows: {len(df_roc)}, Models: {df_roc['MODEL'].unique()}")
+
+        # ------------------------------
+        # PLOT FIGURE - VERTICAL BARS
+        # ------------------------------
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
+
+        # Vertical bars: x=FEATURES, y=MIOU
+        ax1 = sns.barplot(x='FEATURES', y='MIOU', hue='MODEL', data=df_pr, errorbar=None, palette='viridis', hue_order=HUE_ORDER, ax=ax1)
+        
+        ax2 = sns.barplot(x='FEATURES', y='MIOU', hue='MODEL', data=df_roc, errorbar=None, palette='viridis', hue_order=HUE_ORDER, ax=ax2)
+
+        ax1.set_title('PR', fontsize=TITLES_SIZE)
+        ax2.set_title('ROC', fontsize=TITLES_SIZE)
+        ax1.set_ylim(0.2, 1)
+        ax2.set_ylim(0.2, 1)
+        
+        # Remapear los nombres de los ticks del eje X
+        new_labels = ['C', 'N', 'V', 'V+C', 'V+N']
+        ax1.set_xticklabels(new_labels, fontsize=12 * TEXT_SCALE)
+        ax2.set_xticklabels(new_labels, fontsize=12 * TEXT_SCALE)
+
+        ax1.set_ylabel('')
+        ax2.set_ylabel('')
+        ax1.set_xlabel('')
+        ax2.set_xlabel('')
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        
+        # Aumentar tamaño de los ticks
+        ax1.tick_params(axis='y', labelsize=ANNOTATION_SIZE)
+        ax2.tick_params(axis='y', labelsize=ANNOTATION_SIZE)
+        ax1.tick_params(axis='x', labelsize=TITLES_SIZE)
+        ax2.tick_params(axis='x', labelsize=TITLES_SIZE)
+
+        # Obtener los manejadores de la leyenda (solo de ax1)
+        handles, labels = ax1.get_legend_handles_labels()
+        
+        # Invertir el orden de los manejadores y las etiquetas de la leyenda
+        handles = handles[::-1]
+        labels = labels[::-1]
+        
+        # Quitar leyenda individual de los subplots
+        if ax1.get_legend():
+            ax1.get_legend().remove()
+        
+        if ax2.get_legend():
+            ax2.get_legend().remove()
+
+        # Colocar la leyenda fuera de los gráficos
+        fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=4, prop={'size': TITLES_SIZE*TEXT_SCALE})
+
+        # Ajustar layout
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+
+        ax1.autoscale()
+        ax2.autoscale()
+        
+        ax1.yaxis.set_major_formatter(PercentFormatter(1))
+        ax2.yaxis.set_major_formatter(PercentFormatter(1))
+
+        plt.subplots_adjust(wspace=0.2)
+
+        print(f'Figure saved as {self.image_name}.png')
+        print(f'Figure saved as {self.image_name}.eps')
+        # Guardar la figura
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
+
+    def feat_vs_metric_roc_pr_comparison_vertical(self, method='max'):
+        """
+        Compare ROC and PR values in overlapping bars (ROC background, PR foreground).
+        Excludes PointTransformerV3 model.
+        """
+        
+        DATASET_TYPE = 'orthogonal'
+        TEXT_SCALE = 0.8
+        
+        TITLES_SIZE = 16 * TEXT_SCALE
+        ANNOTATION_SIZE = 12 * TEXT_SCALE
+        
+        # Map model names to display names
+        MODEL_NAME_MAP = {
+            'PointNetBinSeg': 'PointNet',
+            'PointNet2BinSeg': 'PointNet++',
+            'PointTrasnformerV3': 'PointTransformerV3',
+            'MinkUNet34C': 'MinkUNet34C'
+        }
+        
+        # Exclude PointTransformerV3
+        HUE_ORDER = ['MinkUNet34C', 'PointNet++', 'PointNet']
+        HUE_ORDER = HUE_ORDER[::-1]
+        
+        self.image_name = 'feat_vs_metric_roc_pr_comparison_vertical_' + DATASET_TYPE
+
+        # ------------------------------
+        # PREPARE DATA
+        # ------------------------------
+        DATASET_ID = 'arvc_truss/test/' + DATASET_TYPE
+        self.df = self.df[self.df['DATASET_DIR'] == DATASET_ID]
+        
+        # Rename models to display names
+        self.df['MODEL'] = self.df['MODEL'].replace(MODEL_NAME_MAP)
+        
+        # Separate PointTransformerV3 data
+        df_ptv3 = self.df[self.df['MODEL'] == 'PointTransformerV3']
+        
+        # Exclude PointTransformerV3 from main dataset
+        self.df = self.df[self.df['MODEL'] != 'PointTransformerV3']
+        
+        print(f"\nDataset filtered for: {DATASET_ID}")
+        print(f"Total rows after dataset filter: {len(self.df)}")
+        print(f"Unique models in data: {self.df['MODEL'].unique()}")
+        print(f"Unique features in data: {self.df['FEATURES'].unique()}")
+     
+        df_pr = self.df[self.df['THRESHOLD_METHOD'] == 'pr'] 
+        df_roc = self.df[self.df['THRESHOLD_METHOD'] == 'roc']
+        
+        # Get PointTransformerV3 data (use PR as the single representation)
+        df_ptv3_single = df_ptv3[df_ptv3['THRESHOLD_METHOD'] == 'pr']
+        
+        print(f"PR rows: {len(df_pr)}, Models: {df_pr['MODEL'].unique()}")
+        print(f"ROC rows: {len(df_roc)}, Models: {df_roc['MODEL'].unique()}")
+
+        # ------------------------------
+        # PLOT FIGURE - OVERLAPPING BARS
+        # ------------------------------
+        fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+
+        # Get unique features for x-axis positioning
+        features = df_pr['FEATURES'].unique()
+        n_features = len(features)
+        n_models = len(HUE_ORDER)
+        
+        # Calculate bar width and positions (add space for PTv3)
+        bar_width = 0.2
+        group_width = bar_width * (n_models + 1)  # +1 for PointTransformerV3
+        
+        # Get viridis colors for each model (including PTv3)
+        colors = sns.color_palette('viridis', n_models + 1)
+        model_colors = {model: colors[i] for i, model in enumerate(HUE_ORDER)}
+        # Add PointTransformerV3 with the last color
+        model_colors['PointTransformerV3'] = colors[-1]
+        
+        # Plot ROC bars (background - with transparency)
+        for i, model in enumerate(HUE_ORDER):
+            df_roc_model = df_roc[df_roc['MODEL'] == model]
+            
+            # Get MIOU values for each feature
+            miou_values = []
+            for feature in features:
+                feature_data = df_roc_model[df_roc_model['FEATURES'] == feature]
+                if len(feature_data) > 0:
+                    miou_values.append(feature_data['MIOU'].values[0])
+                else:
+                    miou_values.append(0)
+            
+            # Calculate x positions
+            x_positions = np.arange(n_features) + i * bar_width - group_width / 2 + bar_width / 2
+            
+            # Plot ROC bars with transparency
+            ax.bar(x_positions, miou_values, bar_width, 
+                   label=f'{model} (ROC)', color=model_colors[model], 
+                   alpha=0.4, edgecolor='black', linewidth=0.5)
+        
+        # Plot PR bars (foreground - solid)
+        for i, model in enumerate(HUE_ORDER):
+            df_pr_model = df_pr[df_pr['MODEL'] == model]
+            
+            # Get MIOU values for each feature
+            miou_values = []
+            for feature in features:
+                feature_data = df_pr_model[df_pr_model['FEATURES'] == feature]
+                if len(feature_data) > 0:
+                    miou_values.append(feature_data['MIOU'].values[0])
+                else:
+                    miou_values.append(0)
+            
+            # Calculate x positions (same as ROC)
+            x_positions = np.arange(n_features) + i * bar_width - group_width / 2 + bar_width / 2
+            
+            # Plot PR bars solid
+            ax.bar(x_positions, miou_values, bar_width, 
+                   label=f'{model} (PR)', color=model_colors[model], 
+                   alpha=1.0, edgecolor='black', linewidth=0.8)
+
+        # Plot PointTransformerV3 as a single solid bar (using PR values)
+        if len(df_ptv3_single) > 0:
+            miou_values_ptv3 = []
+            for feature in features:
+                feature_data = df_ptv3_single[df_ptv3_single['FEATURES'] == feature]
+                if len(feature_data) > 0:
+                    miou_values_ptv3.append(feature_data['MIOU'].values[0])
+                else:
+                    miou_values_ptv3.append(0)
+            
+            # Position PTv3 at the end of each group
+            x_positions_ptv3 = np.arange(n_features) + n_models * bar_width - group_width / 2 + bar_width / 2
+            
+            # Plot PTv3 bars as single solid bars
+            ax.bar(x_positions_ptv3, miou_values_ptv3, bar_width, 
+                   label='PointTransformerV3', color=model_colors['PointTransformerV3'], 
+                   alpha=1.0, edgecolor='black', linewidth=0.8)
+
+        # Configure plot
+        ax.set_ylim(0.2, 1)
+        
+        # Remapear los nombres de los ticks del eje X
+        new_labels = ['C', 'N', 'V', 'V+C', 'V+N']
+        ax.set_xticks(np.arange(n_features))
+        ax.set_xticklabels(new_labels, fontsize=12 * TEXT_SCALE)
+
+        ax.set_ylabel('mIoU', fontsize=TITLES_SIZE)
+        ax.set_xlabel('')
+        ax.set_title('ROC (transparent) vs PR (solid) Comparison', fontsize=TITLES_SIZE)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        # Aumentar tamaño de los ticks
+        ax.tick_params(axis='y', labelsize=ANNOTATION_SIZE)
+        ax.tick_params(axis='x', labelsize=TITLES_SIZE)
+
+        # Create custom legend
+        handles, labels = ax.get_legend_handles_labels()
+        
+        # Colocar la leyenda fuera de los gráficos
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=3, prop={'size': ANNOTATION_SIZE})
+
+        # Ajustar layout
+        plt.tight_layout()
+
+        ax.yaxis.set_major_formatter(PercentFormatter(1))
+        # ax.grid(axis='y', alpha=0.3, linestyle='--')
+
+        print(f'Figure saved as {self.image_name}.png')
+        print(f'Figure saved as {self.image_name}.eps')
+        # Guardar la figura
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
 
     def feat_vs_metric_roc_pr(self, method='max'):
         
-        DATASET_DIR = 'crossed'
+        # DATASET_DIR = 'crossed'
         TITLES_SIZE = 16
         ANNOTATION_SIZE = 12
         HUE_ORDER = ['PointTransformerV3', 'MinkUNet34C', 'PointNet++', 'PointNet']
         HUE_ORDER = HUE_ORDER[::-1]
+        
+        assert len(self.df['DATASET_DIR'].unique()) == 1, "The dataframe should contain data for only one DATASET_DIR"
+        DATASET_DIR = self.df['DATASET_DIR'].unique()[0]
         
         self.image_name = 'feat_vs_metric_roc_pr' +'_' + DATASET_DIR
 
@@ -790,9 +1199,8 @@ class GraphicsPlotter():
         print(f'Figure saved as {self.image_name}.png')
         print(f'Figure saved as {self.image_name}.eps')
         # Guardar la figura
-        fig.savefig(f'/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/{self.image_name}.png', bbox_inches='tight', format='png')
-        fig.savefig(f'/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
-
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
 
     def inference_efficiency(self):
         self.image_name = 'inference_efficiency'

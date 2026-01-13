@@ -14,3 +14,4 @@ assets/
 **.mp4
 docs/shotcut_project**
 **tests/
+**venv/
