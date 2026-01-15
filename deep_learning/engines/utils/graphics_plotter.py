@@ -668,6 +668,217 @@ class GraphicsPlotter():
                                 ha='left', va='center', 
                                 fontsize=12, weight='bold')  # Negrita
 
+
+    def inference_efficiency(self):
+        self.image_name = 'inference_efficiency'
+        
+        df_pn = self.df[self.df['MODEL'] == 'PointNet']
+        df_pnpp = self.df[self.df['MODEL'] == 'PointNet++']
+
+        df_mink = self.df[self.df['MODEL'] == 'MinkUNet34C']
+        df_mink = df_mink[df_mink['VOXEL_SIZE'] == 0.05]
+
+        df_ptv3 = self.df[self.df['MODEL'] == 'PointTransformerV3']
+
+        df_global = pd.concat([df_pn, df_pnpp, df_mink, df_ptv3])
+        # df_global['INFERENCE_DURATION']  
+
+        
+        self.ax = sns.barplot(x='MODEL', y='INFERENCE_DURATION', hue='FEATURES', data=df_global, errorbar=None, estimator=np.mean)
+
+        
+        # self.ax = sns.scatterplot(x='TRAIN_DURATION', y='MIOU', hue='MODEL', data=df_global, s=100, palette='viridis', alpha=0.6)
+        self.set_y_title('INFERENCE_DURATION (seconds)')
+        self.set_x_title('MODEL')
+        self.set_legend()
+        # self.set_x_percent_formatter()
+        
+        self.save_fig_as_image(format='png')
+        self.save_fig_as_image(format='eps')
+        
+    def train_efficiency(self):
+        self.image_name = 'train_efficiency'
+        self.df['BEST_EPOCH'] += 1
+        
+        df_pn = self.df[self.df['MODEL'] == 'PointNet']
+     
+        df_pnpp = self.df[self.df['MODEL'] == 'PointNet++']
+     
+        df_mink = self.df[self.df['MODEL'] == 'MinkUNet34C']
+        df_mink = df_mink[df_mink['VOXEL_SIZE'] == 0.05]
+
+        df_ptv3 = self.df[self.df['MODEL'] == 'PointTransformerV3']
+
+        df_global = pd.concat([df_pn, df_pnpp, df_mink, df_ptv3])
+        df_global['BEST_EPOCH'] += 1
+
+        df_global['TRAIN_DURATION'] = df_global['BEST_EPOCH'].to_numpy() * df_global['EPOCH_DURATION'].to_numpy() 
+        
+        self.ax = sns.barplot(x='MODEL', y='TRAIN_DURATION', hue='FEATURES', data=df_global, errorbar=None, estimator=np.mean)
+
+        
+        # self.ax = sns.scatterplot(x='TRAIN_DURATION', y='MIOU', hue='MODEL', data=df_global, s=100, palette='viridis', alpha=0.6)
+        self.set_y_title('TRAIN_DURATION (hours)')
+        self.set_x_title('MODEL')
+        self.set_legend()
+        # self.set_x_percent_formatter()
+        
+        self.save_fig_as_image(format='png')
+        self.save_fig_as_image(format='eps')
+        
+
+    def time_to_achieve_best_label_scatter(self, label):
+        self.image_name = 'efficiency_scatter_plot.png'
+        
+        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
+        
+        self.ax = sns.scatterplot(x='TRAIN_DURATION', y=label, hue='MODEL', alpha=0.6, data=self.df, s=100)
+        self.ax.legend().remove()
+
+
+    def time_to_achieve_best_label_kde(self, label):
+        self.image_name = 'efficiency_kde_plot.png'
+       
+        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
+       
+        filtered_df = self.df
+        # filtered_df = self.df.loc[self.df[label] > 0.7]
+       
+        color_palette = 'viridis'
+        sns.set_style("white")
+        # self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=self.df, palette=color_palette, fill=False, alpha=0.5, levels=2, zorder=0, linewidths=2)
+        # self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=self.df, palette=color_palette, fill=True, alpha=0.8, thresh=0.65, levels=2, zorder=1)
+        # self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=filtered_df, palette=color_palette, fill=True, alpha=0.8, thresh=0.5, levels=4, zorder=1)
+        self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=filtered_df, palette=color_palette, fill=True, alpha=0.8, thresh=0.2, levels=3)
+
+        
+        self.ax.legend(title='', loc='upper right', bbox_to_anchor=(1, 1.2))    
+
+        # ax = plt.gca()  # Get the current Axes instance
+
+        # # Setting minor locators
+        # ax.xaxis.set_minor_locator(MultipleLocator(0.5)) 
+        self.ax.xaxis.set_minor_locator(MultipleLocator(0.5))  # Tick labels interval
+        self.ax.yaxis.set_minor_locator(MultipleLocator(0.1))  # Tick labels interval
+        # plt.xlim(0, 5)
+        
+        self.set_x_title('TRAIN_DURATION (hours)')
+        self.set_y_title(label)
+        self.set_title('TRAIN_DURATION vs ' + label) 
+
+
+    def voxel_analysis(self):
+        
+        self.image_name = 'voxel_analysis.png'        
+        df = self.df[self.df['MODEL'] == 'MinkUNet34C']
+
+        # BAR PLOT  
+        self.ax = sns.barplot(x='VOXEL_SIZE', y='MIOU', data=df, errorbar=None, width=0.6, palette='viridis', estimator=np.mean)
+        
+        # SCATTER PLOT
+        # # Add horizontal noise (jitter) to the 'VOXEL_SIZE' column
+        # jitter_strength = 0.005  # Adjust the strength of the jitter as needed
+        # df['VOXEL_SIZE_JITTERED'] = df['VOXEL_SIZE'] + np.random.uniform(-jitter_strength, jitter_strength, size=len(df))
+        # self.ax = sns.scatterplot(x='VOXEL_SIZE_JITTERED', y='MIOU', data=df, s=100, palette='viridis', alpha=0.6)
+        
+        plt.savefig(f'/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/{self.image_name}.png', bbox_inches='tight', format='png')
+        plt.savefig(f'/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
+
+    def inference_time(self):
+        self.image_name = 'inference_time.png'
+        
+        # BAR PLOT
+        self.ax = sns.barplot(x='MODEL', y='INFERENCE_DURATION', ci=None, estimator=np.median, data=self.df, palette='viridis')
+        # self.set_y_percent_formatter()
+        
+        # SCATTER PLOT
+        # # Add horizontal noise (jitter) to the 'VOXEL_SIZE' column
+        # jitter_strength = 0.005  # Adjust the strength of the jitter as needed
+        # df['VOXEL_SIZE_JITTERED'] = df['VOXEL_SIZE'] + np.random.uniform(-jitter_strength, jitter_strength, size=len(df))
+        # self.ax = sns.scatterplot(x='VOXEL_SIZE_JITTERED', y='MIOU', data=df, s=100, palette='viridis', alpha=0.6)
+
+
+    def line_plot(self):
+        from matplotlib.lines import Line2D
+        cmap = plt.cm.coolwarm
+                
+        custom_lines = [Line2D([0], [0], color=cmap(0.), lw=4),
+                        Line2D([0], [0], color=cmap(.5), lw=4),
+                        Line2D([0], [0], color=cmap(1.), lw=4),
+                        Line2D([0], [0], color=cmap(1.), lw=4),
+                        Line2D([0], [0], color=cmap(1.), lw=4)]
+        
+        metrics_list = ['PRECISION', 'RECALL', 'F1_SCORE', 'MIOU', 'ACCURACY']
+
+        for metric in metrics_list:
+            self.ax = sns.lineplot(x=self.x_label, y=metric, data=self.df)
+
+        self.ax.legend(custom_lines, metrics_list)
+        self.ax.set_ylim(0.4, 1)
+        # create legend
+
+
+    def threshold_estimator(self):
+        self.image_name = 'threshold_estimator.png'
+        self.filter('MODEL', 'PointTrasnformerV3', negative=True)
+        self.ax = sns.barplot(x='MODEL', y='MIOU', hue='THRESHOLD_METHOD', data=self.df, palette=self.color_palette, ci='sd')
+        self.ax.spines['top'].set_visible(False)
+        self.ax.spines['right'].set_visible(False)
+        self.ax.set_xlabel('')
+        self.ax.set_ylabel('')
+        self.ax.legend(title='', loc='upper right', bbox_to_anchor=(1, 1.2))    
+        self.set_y_percent_formatter()
+
+
+    def hex_efficiency(self, label='MIOU'):
+        from bokeh.plotting import figure, show
+        from bokeh.transform import linear_cmap
+        from bokeh.util.hex import hexbin
+
+        from bokeh.io import export_png 
+
+        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
+        self.x = self.df['TRAIN_DURATION'].to_numpy()
+        self.y = self.df[label].to_numpy()
+
+        bins = hexbin(self.x, self.y, 0.05)
+
+        p = figure(tools="", match_aspect=True, background_fill_color='#440154')
+        p.grid.visible = False
+
+        p.hex_tile(q="q", r="r", size=0.7, line_color=None, source=bins,
+                fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)))
+
+        export_png(p, filename="/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/hexplot.png")
+        # show(p)
+
+
+    def threshold_method_analysis(self, label='MIOU'):
+        from bokeh.layouts import column
+        from bokeh.plotting import figure, show
+        from bokeh.sampledata.autompg import autompg
+        from bokeh.transform import jitter
+        from bokeh.io import export_png 
+        from bokeh.models import FixedTicker
+
+
+        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
+        self.x = self.df['MODEL'].to_numpy()
+        self.y = self.df['TRAIN_DURATION'].to_numpy()
+
+        p = figure(width=600, height=300, title="Years vs mpg with jittering")
+        # p.xgrid.grid_line_color = None
+        # p.xaxis.ticker = FixedTicker(ticks=self.df['MODEL'].unique().tolist())
+
+        p.scatter(x=jitter(self.x, 0.4), y=self.y, size=9, alpha=0.4)
+
+        export_png(p, filename="/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/threshold_method_analysis.png")
+
+
+    def show(self):
+        plt.show()
+
+
     def feat_vs_metric_roc_pr_thesis(self, method='max'):
         
         DATASET_TYPE = 'crossed'
@@ -1076,6 +1287,98 @@ class GraphicsPlotter():
         fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
         fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
 
+    def mean_miou_per_feature_barplot(self):
+        """
+        Create a bar plot showing the mean mIoU across all models for each feature set.
+        Combines both orthogonal and crossed datasets, and both ROC and PR threshold methods.
+        """
+        
+        TEXT_SCALE = 0.8
+        TITLES_SIZE = 16 * TEXT_SCALE
+        ANNOTATION_SIZE = 12 * TEXT_SCALE
+        
+        self.image_name = 'mean_miou_per_feature_barplot'
+        
+        # ------------------------------
+        # PREPARE DATA
+        # ------------------------------
+        # Calculate mean mIoU for each feature across all models, datasets, and threshold methods
+        mean_data = self.df.groupby('FEATURES')['MIOU'].mean().reset_index()
+        mean_data = mean_data.sort_values('MIOU', ascending=False)
+        
+        # Also calculate standard deviation for error bars
+        std_data = self.df.groupby('FEATURES')['MIOU'].std().reset_index()
+        std_data.columns = ['FEATURES', 'MIOU_STD']
+        
+        # Merge mean and std
+        plot_data = mean_data.merge(std_data, on='FEATURES')
+        
+        print(f"\nMean mIoU per feature:")
+        print(plot_data)
+        
+        # Feature name mapping
+        feature_map = {
+            '[0, 1, 2, 7]': 'V+C',
+            '[0, 1, 2, 4, 5, 6]': 'V+N',
+            '[0, 1, 2]': 'V',
+            '[7]': 'C',
+            '[4, 5, 6]': 'N'
+        }
+        
+        plot_data['FEATURE_NAME'] = plot_data['FEATURES'].map(feature_map)
+        
+        # Sort by mIoU for better visualization
+        plot_data = plot_data.sort_values('MIOU', ascending=True)
+        
+        # ------------------------------
+        # PLOT FIGURE
+        # ------------------------------
+        fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+        
+        # Get colors from viridis palette
+        colors = sns.color_palette('viridis', len(plot_data))
+        
+        # Create horizontal bar plot
+        y_positions = np.arange(len(plot_data))
+        bars = ax.barh(y_positions, plot_data['MIOU'].values, 
+                       color=colors, alpha=0.8, 
+                       edgecolor='black', linewidth=0.8)
+        
+        # Add value labels on the bars
+        for i, (idx, row) in enumerate(plot_data.iterrows()):
+            ax.text(row['MIOU'] + 0.01, i, f"{row['MIOU']:.3f}", 
+                   va='center', ha='left', fontsize=ANNOTATION_SIZE)
+        
+        # Configure plot
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels(plot_data['FEATURE_NAME'].values, fontsize=TITLES_SIZE)
+        ax.set_xlabel('mIoU', fontsize=TITLES_SIZE)
+        ax.set_ylabel('Características de entrada', fontsize=TITLES_SIZE)
+        # ax.set_title('', fontsize=TITLES_SIZE)
+        ax.set_xlim(0, 1.0)
+        
+        # Format x-axis as percentage
+        ax.xaxis.set_major_formatter(PercentFormatter(1))
+        ax.tick_params(axis='x', labelsize=ANNOTATION_SIZE)
+        ax.tick_params(axis='y', labelsize=ANNOTATION_SIZE)
+        
+        # Remove top and right spines
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        # # Add grid for better readability
+        # ax.grid(axis='x', alpha=0.3, linestyle='--')
+        
+        # Adjust layout
+        plt.tight_layout()
+        
+        print(f'Figure saved as {self.image_name}.png')
+        print(f'Figure saved as {self.image_name}.eps')
+        
+        # Save figure
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
+        fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
+
     def feat_vs_metric_roc_pr(self, method='max'):
         
         # DATASET_DIR = 'crossed'
@@ -1201,217 +1504,6 @@ class GraphicsPlotter():
         # Guardar la figura
         fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.png', bbox_inches='tight', format='png')
         fig.savefig(f'/home/fran/workspaces/arvc_ws/src/segmentation_pkgs/rs_seg_methods_(cmes)/deep_learning/results/thesis/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
-
-    def inference_efficiency(self):
-        self.image_name = 'inference_efficiency'
-        
-        df_pn = self.df[self.df['MODEL'] == 'PointNet']
-        df_pnpp = self.df[self.df['MODEL'] == 'PointNet++']
-
-        df_mink = self.df[self.df['MODEL'] == 'MinkUNet34C']
-        df_mink = df_mink[df_mink['VOXEL_SIZE'] == 0.05]
-
-        df_ptv3 = self.df[self.df['MODEL'] == 'PointTransformerV3']
-
-        df_global = pd.concat([df_pn, df_pnpp, df_mink, df_ptv3])
-        # df_global['INFERENCE_DURATION']  
-
-        
-        self.ax = sns.barplot(x='MODEL', y='INFERENCE_DURATION', hue='FEATURES', data=df_global, errorbar=None, estimator=np.mean)
-
-        
-        # self.ax = sns.scatterplot(x='TRAIN_DURATION', y='MIOU', hue='MODEL', data=df_global, s=100, palette='viridis', alpha=0.6)
-        self.set_y_title('INFERENCE_DURATION (seconds)')
-        self.set_x_title('MODEL')
-        self.set_legend()
-        # self.set_x_percent_formatter()
-        
-        self.save_fig_as_image(format='png')
-        self.save_fig_as_image(format='eps')
-        
-    def train_efficiency(self):
-        self.image_name = 'train_efficiency'
-        self.df['BEST_EPOCH'] += 1
-        
-        df_pn = self.df[self.df['MODEL'] == 'PointNet']
-     
-        df_pnpp = self.df[self.df['MODEL'] == 'PointNet++']
-     
-        df_mink = self.df[self.df['MODEL'] == 'MinkUNet34C']
-        df_mink = df_mink[df_mink['VOXEL_SIZE'] == 0.05]
-
-        df_ptv3 = self.df[self.df['MODEL'] == 'PointTransformerV3']
-
-        df_global = pd.concat([df_pn, df_pnpp, df_mink, df_ptv3])
-        df_global['BEST_EPOCH'] += 1
-
-        df_global['TRAIN_DURATION'] = df_global['BEST_EPOCH'].to_numpy() * df_global['EPOCH_DURATION'].to_numpy() 
-        
-        self.ax = sns.barplot(x='MODEL', y='TRAIN_DURATION', hue='FEATURES', data=df_global, errorbar=None, estimator=np.mean)
-
-        
-        # self.ax = sns.scatterplot(x='TRAIN_DURATION', y='MIOU', hue='MODEL', data=df_global, s=100, palette='viridis', alpha=0.6)
-        self.set_y_title('TRAIN_DURATION (hours)')
-        self.set_x_title('MODEL')
-        self.set_legend()
-        # self.set_x_percent_formatter()
-        
-        self.save_fig_as_image(format='png')
-        self.save_fig_as_image(format='eps')
-        
-
-    def time_to_achieve_best_label_scatter(self, label):
-        self.image_name = 'efficiency_scatter_plot.png'
-        
-        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
-        
-        self.ax = sns.scatterplot(x='TRAIN_DURATION', y=label, hue='MODEL', alpha=0.6, data=self.df, s=100)
-        self.ax.legend().remove()
-
-
-    def time_to_achieve_best_label_kde(self, label):
-        self.image_name = 'efficiency_kde_plot.png'
-       
-        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
-       
-        filtered_df = self.df
-        # filtered_df = self.df.loc[self.df[label] > 0.7]
-       
-        color_palette = 'viridis'
-        sns.set_style("white")
-        # self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=self.df, palette=color_palette, fill=False, alpha=0.5, levels=2, zorder=0, linewidths=2)
-        # self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=self.df, palette=color_palette, fill=True, alpha=0.8, thresh=0.65, levels=2, zorder=1)
-        # self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=filtered_df, palette=color_palette, fill=True, alpha=0.8, thresh=0.5, levels=4, zorder=1)
-        self.ax = sns.kdeplot(x='TRAIN_DURATION', y=label, hue='MODEL', data=filtered_df, palette=color_palette, fill=True, alpha=0.8, thresh=0.2, levels=3)
-
-        
-        self.ax.legend(title='', loc='upper right', bbox_to_anchor=(1, 1.2))    
-
-        # ax = plt.gca()  # Get the current Axes instance
-
-        # # Setting minor locators
-        # ax.xaxis.set_minor_locator(MultipleLocator(0.5)) 
-        self.ax.xaxis.set_minor_locator(MultipleLocator(0.5))  # Tick labels interval
-        self.ax.yaxis.set_minor_locator(MultipleLocator(0.1))  # Tick labels interval
-        # plt.xlim(0, 5)
-        
-        self.set_x_title('TRAIN_DURATION (hours)')
-        self.set_y_title(label)
-        self.set_title('TRAIN_DURATION vs ' + label) 
-
-
-    def voxel_analysis(self):
-        
-        self.image_name = 'voxel_analysis.png'        
-        df = self.df[self.df['MODEL'] == 'MinkUNet34C']
-
-        # BAR PLOT  
-        self.ax = sns.barplot(x='VOXEL_SIZE', y='MIOU', data=df, errorbar=None, width=0.6, palette='viridis', estimator=np.mean)
-        
-        # SCATTER PLOT
-        # # Add horizontal noise (jitter) to the 'VOXEL_SIZE' column
-        # jitter_strength = 0.005  # Adjust the strength of the jitter as needed
-        # df['VOXEL_SIZE_JITTERED'] = df['VOXEL_SIZE'] + np.random.uniform(-jitter_strength, jitter_strength, size=len(df))
-        # self.ax = sns.scatterplot(x='VOXEL_SIZE_JITTERED', y='MIOU', data=df, s=100, palette='viridis', alpha=0.6)
-        
-        plt.savefig(f'/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/{self.image_name}.png', bbox_inches='tight', format='png')
-        plt.savefig(f'/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/{self.image_name}.eps', bbox_inches='tight', format='eps')
-
-    def inference_time(self):
-        self.image_name = 'inference_time.png'
-        
-        # BAR PLOT
-        self.ax = sns.barplot(x='MODEL', y='INFERENCE_DURATION', ci=None, estimator=np.median, data=self.df, palette='viridis')
-        # self.set_y_percent_formatter()
-        
-        # SCATTER PLOT
-        # # Add horizontal noise (jitter) to the 'VOXEL_SIZE' column
-        # jitter_strength = 0.005  # Adjust the strength of the jitter as needed
-        # df['VOXEL_SIZE_JITTERED'] = df['VOXEL_SIZE'] + np.random.uniform(-jitter_strength, jitter_strength, size=len(df))
-        # self.ax = sns.scatterplot(x='VOXEL_SIZE_JITTERED', y='MIOU', data=df, s=100, palette='viridis', alpha=0.6)
-
-
-    def line_plot(self):
-        from matplotlib.lines import Line2D
-        cmap = plt.cm.coolwarm
-                
-        custom_lines = [Line2D([0], [0], color=cmap(0.), lw=4),
-                        Line2D([0], [0], color=cmap(.5), lw=4),
-                        Line2D([0], [0], color=cmap(1.), lw=4),
-                        Line2D([0], [0], color=cmap(1.), lw=4),
-                        Line2D([0], [0], color=cmap(1.), lw=4)]
-        
-        metrics_list = ['PRECISION', 'RECALL', 'F1_SCORE', 'MIOU', 'ACCURACY']
-
-        for metric in metrics_list:
-            self.ax = sns.lineplot(x=self.x_label, y=metric, data=self.df)
-
-        self.ax.legend(custom_lines, metrics_list)
-        self.ax.set_ylim(0.4, 1)
-        # create legend
-
-
-    def threshold_estimator(self):
-        self.image_name = 'threshold_estimator.png'
-        self.filter('MODEL', 'PointTrasnformerV3', negative=True)
-        self.ax = sns.barplot(x='MODEL', y='MIOU', hue='THRESHOLD_METHOD', data=self.df, palette=self.color_palette, ci='sd')
-        self.ax.spines['top'].set_visible(False)
-        self.ax.spines['right'].set_visible(False)
-        self.ax.set_xlabel('')
-        self.ax.set_ylabel('')
-        self.ax.legend(title='', loc='upper right', bbox_to_anchor=(1, 1.2))    
-        self.set_y_percent_formatter()
-
-
-    def hex_efficiency(self, label='MIOU'):
-        from bokeh.plotting import figure, show
-        from bokeh.transform import linear_cmap
-        from bokeh.util.hex import hexbin
-
-        from bokeh.io import export_png 
-
-        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
-        self.x = self.df['TRAIN_DURATION'].to_numpy()
-        self.y = self.df[label].to_numpy()
-
-        bins = hexbin(self.x, self.y, 0.05)
-
-        p = figure(tools="", match_aspect=True, background_fill_color='#440154')
-        p.grid.visible = False
-
-        p.hex_tile(q="q", r="r", size=0.7, line_color=None, source=bins,
-                fill_color=linear_cmap('counts', 'Viridis256', 0, max(bins.counts)))
-
-        export_png(p, filename="/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/hexplot.png")
-        # show(p)
-
-
-    def threshold_method_analysis(self, label='MIOU'):
-        from bokeh.layouts import column
-        from bokeh.plotting import figure, show
-        from bokeh.sampledata.autompg import autompg
-        from bokeh.transform import jitter
-        from bokeh.io import export_png 
-        from bokeh.models import FixedTicker
-
-
-        self.df['TRAIN_DURATION'] = self.df['BEST_EPOCH'].to_numpy() * self.df['EPOCH_DURATION'].to_numpy() 
-        self.x = self.df['MODEL'].to_numpy()
-        self.y = self.df['TRAIN_DURATION'].to_numpy()
-
-        p = figure(width=600, height=300, title="Years vs mpg with jittering")
-        # p.xgrid.grid_line_color = None
-        # p.xaxis.ticker = FixedTicker(ticks=self.df['MODEL'].unique().tolist())
-
-        p.scatter(x=jitter(self.x, 0.4), y=self.y, size=9, alpha=0.4)
-
-        export_png(p, filename="/home/fran/workspaces/nn_ws/binary_segmentation/experiments/images/threshold_method_analysis.png")
-
-
-    def show(self):
-        plt.show()
-
-
 
 
     # ------------------------------

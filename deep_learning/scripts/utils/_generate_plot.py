@@ -95,7 +95,10 @@ if __name__ == '__main__':
     # plotter.feat_vs_metric_roc_pr()
     # plotter.feat_vs_metric_roc_pr_thesis()
     # plotter.feat_vs_metric_roc_pr_thesis_vertical()
-    plotter.feat_vs_metric_roc_pr_comparison_vertical()
+    # plotter.feat_vs_metric_roc_pr_comparison_vertical()
+    # plotter.feat_vs_metric_roc_pr_comparison_vertical_combined()
+    # plotter.features_vs_mean_miou_roc()
+    plotter.mean_miou_per_feature_barplot()
     
     # plotter.train_efficiency()
     # plotter.inference_efficiency()
