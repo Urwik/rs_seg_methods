@@ -1333,7 +1333,7 @@ class GraphicsPlotter():
         # ------------------------------
         # PLOT FIGURE
         # ------------------------------
-        fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+        fig, ax = plt.subplots(1, 1, figsize=(8, 4))
         
         # Get colors from viridis palette
         colors = sns.color_palette('viridis', len(plot_data))
